@@ -1,6 +1,9 @@
+import matplotlib
+matplotlib.use('Agg')  # Use non-interactive backend for cleaner PNG output
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 import json
+import os
 import sys
 
 # --- CONFIGURATION ---
@@ -257,10 +260,11 @@ def draw_blueprint(filename, title, layout_type, orientation,
 
     # Clean up
     ax.axis('off')
-    
-    plt.savefig(filename, bbox_inches='tight', pad_inches=0.1)
+
+    output_path = os.path.join('output', filename)
+    plt.savefig(output_path, bbox_inches='tight', pad_inches=0.1)
     plt.close()
-    print(f"Generated: {filename}")
+    print(f"Generated: {output_path}")
 
 # ==========================================
 # LOAD LAYOUTS FROM JSON

@@ -26,6 +26,3 @@ python PrintLayoutDesigner.py
 - Layouts: Edit `layouts.json` to modify individual layout parameters
 - `black_border`: Set per-layout in JSON (0 = no border, 0.125 = 1/8 inch black line around paper edge)
 
-## Known Issues
-
-- macOS Preview/Quick Look may fail to display some generated PNGs (Safari and Acrobat work fine)
