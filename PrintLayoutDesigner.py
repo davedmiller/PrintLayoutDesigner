@@ -5,8 +5,8 @@ import sys
 
 # --- CONFIGURATION ---
 # Blueprint drawing size (the canvas we're drawing on)
-BLUEPRINT_W = 24
-BLUEPRINT_H = 36
+BLUEPRINT_W = 18
+BLUEPRINT_H = 24
 
 # Print paper size (the actual paper being designed for printing)
 PAPER_W = 8.5
@@ -39,7 +39,7 @@ def draw_horizontal_dim_line(ax, y, x_start, x_end, label, dim_id=None, offset=0
     ax.text(mid_x, y + 0.1 + offset, label_text, ha='center', va='bottom', fontsize=7, color=BLUE)
 
 def draw_blueprint(filename, title, layout_type, orientation,
-                   paper_w, paper_h,
+                   paper_w, paper_h, black_border,
                    img_w, img_h, img_margins,
                    txt_dims, txt_pos_desc,
                    notes, special_mode=None):
@@ -85,8 +85,15 @@ def draw_blueprint(filename, title, layout_type, orientation,
     paper_y = title_block_top + (available_height - paper_h) / 2
 
     # Draw Print Paper Border
-    border = patches.Rectangle((paper_x, paper_y), paper_w, paper_h, linewidth=3, edgecolor=BLUE, facecolor='none')
+    border = patches.Rectangle((paper_x, paper_y), paper_w, paper_h, linewidth=3, edgecolor=BLUE, facecolor='white')
     ax.add_patch(border)
+
+    # Draw optional black border around paper edge
+    if black_border > 0:
+        black_border_rect = patches.Rectangle((paper_x, paper_y), paper_w, paper_h,
+                                              linewidth=black_border * DPI / 2,
+                                              edgecolor='black', facecolor='none')
+        ax.add_patch(black_border_rect)
 
     # --- CALCULATE IMAGE POSITION (relative to paper, not blueprint) ---
     # Default: Center Horizontal if 'left'/'right' not specified in margins
@@ -284,6 +291,7 @@ if __name__ == "__main__":
             orientation="Portrait",
             paper_w=layout['paper_size'][0],
             paper_h=layout['paper_size'][1],
+            black_border=layout.get('black_border', 0),
             img_w=layout['img'][0],
             img_h=layout['img'][1],
             img_margins=layout['margins'],
