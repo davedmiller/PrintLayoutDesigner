@@ -1,0 +1,146 @@
+[
+  {
+    "file": "01_ClassicMuseum_Land.png",
+    "title": "Classic Museum - Landscape",
+    "paper_size": [8.5, 11],
+    "img": [6, 4],
+    "margins": {"top": 2},
+    "txt_dims": [6, 1.75],
+    "txt_pos": {"gap": 1},
+    "notes": "Layout: Classic Museum\nPaper: 8.5x11\nOrientation: Landscape Img\nTop Margin: 2\"\nText Gap: 1\""
+  },
+  {
+    "file": "02_ClassicMuseum_Port.png",
+    "title": "Classic Museum - Portrait",
+    "paper_size": [8.5, 11],
+    "img": [4, 6],
+    "margins": {"top": 1.5},
+    "txt_dims": [4, 2.5],
+    "txt_pos": {"gap": 0.75},
+    "notes": "Layout: Classic Museum\nPaper: 8.5x11\nOrientation: Portrait Img\nTop Margin: 1.5\"\nText Gap: 0.75\""
+  },
+  {
+    "file": "03_ArtBook_Land.png",
+    "title": "Art Book - Landscape",
+    "paper_size": [8.5, 11],
+    "img": [6, 4],
+    "margins": {"top": 2, "right": 1},
+    "txt_dims": [5, 2],
+    "txt_pos": {"bottom_margin": 2},
+    "notes": "Layout: Art Book\nPaper: 8.5x11\nImg: Top Right (2\" Top, 1\" Right)\nTxt: Bottom Left (2\" Bottom, 1\" Left)"
+  },
+  {
+    "file": "04_ArtBook_Port.png",
+    "title": "Art Book - Portrait",
+    "paper_size": [8.5, 11],
+    "img": [4, 6],
+    "margins": {"top": 1.5, "right": 1},
+    "txt_dims": [5, 2.5],
+    "txt_pos": {"bottom_margin": 1.5},
+    "notes": "Layout: Art Book\nPaper: 8.5x11\nImg: Top Right (1.5\" Top, 1\" Right)\nTxt: Bottom Left (1.5\" Bottom, 1\" Left)"
+  },
+  {
+    "file": "05_Footer_Land.png",
+    "title": "Footer - Landscape",
+    "paper_size": [8.5, 11],
+    "img": [6, 4],
+    "margins": {"top": 2.5},
+    "txt_dims": [7.5, 1],
+    "txt_pos": {"bottom_margin": 1},
+    "notes": "Layout: Footer\nPaper: 8.5x11\nImg: Optical Center\nText: Wide Footer (7.5\") anchored 1\" from bottom."
+  },
+  {
+    "file": "06_Footer_Port.png",
+    "title": "Footer - Portrait",
+    "paper_size": [8.5, 11],
+    "img": [4, 6],
+    "margins": {"top": 2},
+    "txt_dims": [7.5, 1],
+    "txt_pos": {"bottom_margin": 1},
+    "notes": "Layout: Footer\nPaper: 8.5x11\nImg: Optical Center\nText: Wide Footer (7.5\") anchored 1\" from bottom."
+  },
+  {
+    "file": "07_Broadside_Port.png",
+    "title": "Broadside - Portrait",
+    "paper_size": [8.5, 11],
+    "img": [4, 6],
+    "margins": {"left": 0.75, "center_v": true},
+    "txt_dims": [2.5, 6],
+    "txt_pos": {},
+    "special": "broadside",
+    "notes": "Layout: Broadside\nPaper: 8.5x11\nImg: Left (0.75\" Margin)\nTxt: Right Column (2.5\" Wide)\nMagazine spread look."
+  },
+  {
+    "file": "08_DoubleCol_Land.png",
+    "title": "Double Column - Landscape",
+    "paper_size": [8.5, 11],
+    "img": [6, 4],
+    "margins": {"top": 2},
+    "txt_dims": [6, 2],
+    "txt_pos": {"gap": 0.75},
+    "special": "double_col",
+    "notes": "Layout: Double Column\nPaper: 8.5x11\nImg: Centered Top\nTxt: Two 2.75\" columns with 0.5\" gutter."
+  },
+  {
+    "file": "09_VisualAnchor_Land.png",
+    "title": "Visual Anchor - Landscape",
+    "paper_size": [8.5, 11],
+    "img": [6, 4],
+    "margins": {"top": 2.5},
+    "txt_dims": [6, 1.75],
+    "txt_pos": {"gap": 1},
+    "notes": "Layout: Visual Anchor\nPaper: 8.5x11\nImg: Centered Top (2.5\")\nText: Matches image width."
+  },
+  {
+    "file": "10_VisualAnchor_Port.png",
+    "title": "Visual Anchor - Portrait",
+    "paper_size": [8.5, 11],
+    "img": [4, 6],
+    "margins": {"top": 2},
+    "txt_dims": [4, 2],
+    "txt_pos": {"gap": 0.75},
+    "notes": "Layout: Visual Anchor\nPaper: 8.5x11\nImg: Centered Top (2\")\nText: Matches image width."
+  },
+  {
+    "file": "11_HighGallery_Land.png",
+    "title": "High Gallery - Landscape",
+    "paper_size": [8.5, 11],
+    "img": [6, 4],
+    "margins": {"top": 1.5},
+    "txt_dims": [6, 1],
+    "txt_pos": {"bottom_margin": 1.5},
+    "notes": "Layout: High Gallery\nPaper: 8.5x11\nImg: High Center\nTxt: Low Center\nNote the large void in middle."
+  },
+  {
+    "file": "12_HighGallery_Port.png",
+    "title": "High Gallery - Portrait",
+    "paper_size": [8.5, 11],
+    "img": [4, 6],
+    "margins": {"top": 1.5},
+    "txt_dims": [4, 1],
+    "txt_pos": {"bottom_margin": 1.5},
+    "notes": "Layout: High Gallery\nPaper: 8.5x11\nImg: High Center\nTxt: Low Center\nNote the vertical pause."
+  },
+  {
+    "file": "13_AsymOffset_Land.png",
+    "title": "Asym Offset - Landscape",
+    "paper_size": [8.5, 11],
+    "img": [6, 4],
+    "margins": {"right": 1, "center_v": true},
+    "txt_dims": [6, 1.5],
+    "txt_pos": {"gap": 0.5},
+    "special": "asym",
+    "notes": "Layout: Asym Offset\nPaper: 8.5x11\nImg: Pushed Right (1\" margin)\nTxt: Flush Left with Image."
+  },
+  {
+    "file": "14_AsymOffset_Port.png",
+    "title": "Asym Offset - Portrait",
+    "paper_size": [8.5, 11],
+    "img": [4, 6],
+    "margins": {"right": 1.5, "center_v": true},
+    "txt_dims": [4, 2],
+    "txt_pos": {"gap": 0.5},
+    "special": "asym",
+    "notes": "Layout: Asym Offset\nPaper: 8.5x11\nImg: Pushed Right (1.5\" margin)\nTxt: Flush Left with Image."
+  }
+]

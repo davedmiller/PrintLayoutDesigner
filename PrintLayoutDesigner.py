@@ -1,55 +1,109 @@
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
+import json
+import sys
 
 # --- CONFIGURATION ---
-FIG_W = 8.5
-FIG_H = 11
+# Blueprint drawing size (the canvas we're drawing on)
+BLUEPRINT_W = 24
+BLUEPRINT_H = 36
+
+# Print paper size (the actual paper being designed for printing)
+PAPER_W = 8.5
+PAPER_H = 11
+
 DPI = 150  # High resolution for crisp text
 BLUE = '#1E3D59'
 PAPER_COLOR = '#FDFBF7'
 
-def draw_dim_line(ax, x, y_start, y_end, label):
-    """Draws a vertical dimension line with arrows"""
+def draw_dim_line(ax, x, y_start, y_end, label, dim_id=None):
+    """Draws a vertical dimension line with arrows and optional ID"""
     ax.annotate(text='', xy=(x, y_start), xytext=(x, y_end),
                 arrowprops=dict(arrowstyle='<->', color=BLUE, lw=0.8))
     mid_y = (y_start + y_end) / 2
-    ax.text(x - 0.1, mid_y, label, ha='right', va='center', fontsize=7, color=BLUE, rotation=90)
+    if dim_id:
+        label_text = f"{dim_id}: {label}"
+    else:
+        label_text = label
+    ax.text(x - 0.1, mid_y, label_text, ha='right', va='center', fontsize=7, color=BLUE, rotation=90)
 
-def draw_blueprint(filename, title, layout_type, orientation, 
-                   img_w, img_h, img_margins, 
-                   txt_dims, txt_pos_desc, 
+def draw_horizontal_dim_line(ax, y, x_start, x_end, label, dim_id=None, offset=0):
+    """Draws a horizontal dimension line with arrows and optional ID"""
+    ax.annotate(text='', xy=(x_start, y), xytext=(x_end, y),
+                arrowprops=dict(arrowstyle='<->', color=BLUE, lw=0.8))
+    mid_x = (x_start + x_end) / 2
+    if dim_id:
+        label_text = f"{dim_id}: {label}"
+    else:
+        label_text = label
+    ax.text(mid_x, y + 0.1 + offset, label_text, ha='center', va='bottom', fontsize=7, color=BLUE)
+
+def draw_blueprint(filename, title, layout_type, orientation,
+                   paper_w, paper_h,
+                   img_w, img_h, img_margins,
+                   txt_dims, txt_pos_desc,
                    notes, special_mode=None):
     """
     Generates a single blueprint image.
-    img_margins = {'top': val, 'left': val, 'right': val} 
+    paper_w, paper_h = dimensions of the print paper (e.g., 8.5x11 or 11x14)
+    img_margins = {'top': val, 'left': val, 'right': val}
     (We calculate X/Y based on margins or centering logic)
     """
-    fig, ax = plt.subplots(figsize=(FIG_W, FIG_H), dpi=DPI)
-    ax.set_xlim(0, FIG_W)
-    ax.set_ylim(0, FIG_H)
+    # Use BLUEPRINT size for canvas, PAPER size for the print paper border
+    fig, ax = plt.subplots(figsize=(BLUEPRINT_W, BLUEPRINT_H), dpi=DPI)
+    ax.set_xlim(-1, BLUEPRINT_W - 1)
+    ax.set_ylim(-1, BLUEPRINT_H - 1)
     fig.patch.set_facecolor(PAPER_COLOR)
     ax.set_facecolor(PAPER_COLOR)
-    
-    # Draw Paper Border
-    border = patches.Rectangle((0, 0), FIG_W, FIG_H, linewidth=3, edgecolor=BLUE, facecolor='none')
+
+    # Draw canvas border (1/4 inch from edge)
+    # The axes go from -1 to BLUEPRINT_W-1 and -1 to BLUEPRINT_H-1
+    # So we need to account for the -1 offset
+    BORDER_MARGIN = 0.25
+    canvas_border = patches.Rectangle((-1 + BORDER_MARGIN, -1 + BORDER_MARGIN),
+                                     BLUEPRINT_W - 2*BORDER_MARGIN,
+                                     BLUEPRINT_H - 2*BORDER_MARGIN,
+                                     linewidth=1, edgecolor=BLUE, facecolor='none')
+    ax.add_patch(canvas_border)
+
+    # Title block dimensions (defined here so we can use for paper positioning)
+    title_block_h = 2.5
+    # Position title block so its bottom edge touches the canvas border
+    title_block_y = -1 + BORDER_MARGIN
+    title_block_top = title_block_y + title_block_h
+
+    # Calculate paper position
+    # Horizontal: center on canvas
+    # Coordinate space goes from -1 to (BLUEPRINT_W - 1)
+    # Center is at: -1 + BLUEPRINT_W/2 = BLUEPRINT_W/2 - 1
+    canvas_center_x = BLUEPRINT_W/2 - 1
+    paper_x = canvas_center_x - paper_w/2
+
+    # Vertical: center between top of canvas and top of title block
+    # Top of coordinate space is at BLUEPRINT_H - 1
+    available_height = (BLUEPRINT_H - 1) - title_block_top
+    paper_y = title_block_top + (available_height - paper_h) / 2
+
+    # Draw Print Paper Border
+    border = patches.Rectangle((paper_x, paper_y), paper_w, paper_h, linewidth=3, edgecolor=BLUE, facecolor='none')
     ax.add_patch(border)
 
-    # --- CALCULATE IMAGE POSITION ---
+    # --- CALCULATE IMAGE POSITION (relative to paper, not blueprint) ---
     # Default: Center Horizontal if 'left'/'right' not specified in margins
     if 'left' in img_margins:
-        img_x = img_margins['left']
+        img_x = paper_x + img_margins['left']
     elif 'right' in img_margins:
-        img_x = FIG_W - img_margins['right'] - img_w
+        img_x = paper_x + paper_w - img_margins['right'] - img_w
     else:
-        img_x = (FIG_W - img_w) / 2
+        img_x = paper_x + (paper_w - img_w) / 2
 
     # Calculate Y based on Top Margin or Vertical Centering
     if 'top' in img_margins:
-        img_y = FIG_H - img_margins['top'] - img_h
+        img_y = paper_y + paper_h - img_margins['top'] - img_h
     elif 'center_v' in img_margins:
-        img_y = (FIG_H - img_h) / 2
+        img_y = paper_y + (paper_h - img_h) / 2
     else:
-        img_y = (FIG_H - img_h) / 2 # Default fallback
+        img_y = paper_y + (paper_h - img_h) / 2 # Default fallback
 
     # Draw Image
     img_rect = patches.Rectangle((img_x, img_y), img_w, img_h, 
@@ -58,31 +112,31 @@ def draw_blueprint(filename, title, layout_type, orientation,
     ax.text(img_x + img_w/2, img_y + img_h/2, f"IMAGE\n{img_w}\" x {img_h}\"", 
             ha='center', va='center', color=BLUE, fontsize=10, fontweight='bold')
 
-    # --- CALCULATE TEXT POSITION ---
+    # --- CALCULATE TEXT POSITION (relative to paper) ---
     txt_w, txt_h = txt_dims
-    
+
     # Text X Logic
     if special_mode == 'broadside':
-        txt_x = FIG_W - 0.75 - txt_w # Right margin 0.75 specific
+        txt_x = paper_x + paper_w - 0.75 - txt_w # Right margin 0.75 specific
     elif special_mode == 'asym':
         txt_x = img_x # Align flush left with image
     elif 'left' in img_margins and 'Art Book' in title:
-        txt_x = 1 # Specific for Art Book Bottom Left
+        txt_x = paper_x + 1 # Specific for Art Book Bottom Left
     elif 'Art Book' in title: # Landscape Art book
-        txt_x = 1
+        txt_x = paper_x + 1
     else:
-        txt_x = (FIG_W - txt_w) / 2 # Default Center
+        txt_x = paper_x + (paper_w - txt_w) / 2 # Default Center
 
     # Text Y Logic
     if 'gap' in txt_pos_desc:
         gap = txt_pos_desc['gap']
         txt_y = img_y - gap - txt_h
     elif 'bottom_margin' in txt_pos_desc:
-        txt_y = txt_pos_desc['bottom_margin']
+        txt_y = paper_y + txt_pos_desc['bottom_margin']
     elif special_mode == 'broadside':
         txt_y = img_y # Align top with image for magazine look
     else:
-        txt_y = 2 # Fallback
+        txt_y = paper_y + 2 # Fallback
 
     # Draw Text Block(s)
     if special_mode == 'double_col':
@@ -101,29 +155,99 @@ def draw_blueprint(filename, title, layout_type, orientation,
         ax.text(txt_x + txt_w/2, txt_y + txt_h/2, "CAPTION TEXT\n(Greeked)", 
                 ha='center', va='center', color=BLUE, fontsize=8, alpha=0.6, style='italic')
 
-    # --- ANNOTATIONS (NOTES SIDEBAR) ---
-    note_w = 2.5
-    note_h = 3.5
-    note_x = FIG_W - note_w - 0.5
-    note_y = 0.5
-    
-    # White box for notes
-    note_bg = patches.Rectangle((note_x, note_y), note_w, note_h, lw=1, ec=BLUE, fc='white')
-    ax.add_patch(note_bg)
-    
-    ax.text(note_x + 0.1, note_y + note_h - 0.3, "INSTALLATION DATA", 
-            fontsize=9, fontweight='bold', color=BLUE)
-    ax.text(note_x + 0.1, note_y + note_h - 0.6, notes, 
+    # --- TITLE BLOCK (Bottom of Blueprint) ---
+    # title_block_h and title_block_y already defined above for paper positioning
+    # Make title block edges touch the left and right canvas borders
+    title_block_x = -1 + BORDER_MARGIN
+    # Width spans from left border to right border
+    # Right border is at: (BLUEPRINT_W - 1 - BORDER_MARGIN)
+    title_block_w = (BLUEPRINT_W - 1 - BORDER_MARGIN) - (-1 + BORDER_MARGIN)
+
+    # Draw title block border
+    title_block_border = patches.Rectangle((title_block_x, title_block_y), title_block_w, title_block_h,
+                                           linewidth=2, edgecolor=BLUE, facecolor='white')
+    ax.add_patch(title_block_border)
+
+    # Divide title block into two sections: title (left) and notes (right)
+    divider_x = title_block_x + title_block_w * 0.6
+    ax.plot([divider_x, divider_x], [title_block_y, title_block_y + title_block_h],
+            color=BLUE, linewidth=1.5)
+
+    # Title section (left side - 60%)
+    ax.text(title_block_x + 0.2, title_block_y + title_block_h - 0.4, "LAYOUT",
+            fontsize=8, fontweight='bold', color=BLUE)
+    ax.text(title_block_x + 0.2, title_block_y + title_block_h - 0.8, title.upper(),
+            fontsize=12, fontweight='bold', color=BLUE)
+    ax.text(title_block_x + 0.2, title_block_y + 0.4, f"Paper Size: {paper_w}\" × {paper_h}\"",
+            fontsize=8, color='#333333')
+
+    # Notes section (right side - 40%)
+    ax.text(divider_x + 0.2, title_block_y + title_block_h - 0.4, "INSTALLATION DATA",
+            fontsize=8, fontweight='bold', color=BLUE)
+    ax.text(divider_x + 0.2, title_block_y + title_block_h - 0.7, notes,
             fontsize=7, va='top', color='#333333', wrap=True)
 
-    # --- TITLE ---
-    ax.text(FIG_W/2, FIG_H - 0.5, title.upper(), ha='center', fontsize=14, fontweight='bold', color=BLUE)
-
     # --- DIMENSIONS (Visual Aids) ---
-    # Top Margin Dimension
+    # All dimension lines are positioned outside the paper
+    # Calculate caption boundaries
+    caption_top = txt_y + txt_h
+    caption_bottom = txt_y
+    caption_left = txt_x
+    caption_right = txt_x + txt_w
+
+    # D1: Top Margin Dimension (from top of paper to top of image)
+    # Position: 1/2 inch left of paper edge
     if 'top' in img_margins:
-        draw_dim_line(ax, img_x - 0.3, FIG_H, FIG_H - img_margins['top'], f"{img_margins['top']}\"")
-    
+        d1_x = paper_x - 0.5
+        draw_dim_line(ax, d1_x, paper_y + paper_h, img_y + img_h, f"{img_margins['top']}\"", dim_id="D1")
+
+    # D5: Dimension between bottom of image and top of caption (gap)
+    # Position: 1/2 inch left of paper edge (same line as D1)
+    gap_distance = img_y - caption_top
+    if gap_distance > 0.1:  # Only show if there's a meaningful gap
+        d5_x = paper_x - 0.5
+        draw_dim_line(ax, d5_x, img_y, caption_top, f"{gap_distance:.2f}\"", dim_id="D5")
+
+    # D4: Dimension from top of paper to top of caption
+    # Position: 1 inch left of paper edge
+    distance_sheet_to_caption = (paper_y + paper_h) - caption_top
+    d4_x = paper_x - 1.0
+    draw_dim_line(ax, d4_x, paper_y + paper_h, caption_top, f"{distance_sheet_to_caption:.2f}\"", dim_id="D4")
+
+    # D6: Caption left margin (from left edge of paper to left edge of caption)
+    # Position: 1 inch left of paper edge (same line as D4)
+    caption_left_margin = caption_left - paper_x
+    if abs(caption_left_margin) > 0.1:  # Only show if there's a meaningful margin
+        d6_x = paper_x - 1.0
+        draw_dim_line(ax, d6_x, caption_bottom, caption_top, f"{caption_left_margin:.2f}\"", dim_id="D6")
+
+    # D2: Left Margin Dimension (from left edge of paper to left of image)
+    # Position: 1/2 inch above paper top
+    left_margin = img_x - paper_x
+    draw_horizontal_dim_line(ax, paper_y + paper_h + 0.5, paper_x, img_x, f"{left_margin:.2f}\"", dim_id="D2")
+
+    # D3: Right Margin Dimension (from right of image to right edge of paper)
+    # Position: 1/2 inch above paper top (same line as D2)
+    right_margin = (paper_x + paper_w) - (img_x + img_w)
+    draw_horizontal_dim_line(ax, paper_y + paper_h + 0.5, img_x + img_w, paper_x + paper_w, f"{right_margin:.2f}\"", dim_id="D3")
+
+    # D9: Text box left edge position (from left edge of paper to left of text box)
+    # Position: 1 inch above paper top
+    txt_left_margin = txt_x - paper_x
+    draw_horizontal_dim_line(ax, paper_y + paper_h + 1.0, paper_x, txt_x, f"{txt_left_margin:.2f}\"", dim_id="D9")
+
+    # D10: Text box width
+    # Position: 1 inch above paper top (same line as D9)
+    draw_horizontal_dim_line(ax, paper_y + paper_h + 1.0, txt_x, txt_x + txt_w, f"{txt_w:.2f}\"", dim_id="D10")
+
+    # D7: Overall paper width
+    # Position: 1/2 inch below paper bottom
+    draw_horizontal_dim_line(ax, paper_y - 0.5, paper_x, paper_x + paper_w, f"{paper_w}\"", dim_id="D7", offset=0)
+
+    # D8: Overall paper height
+    # Position: 1/2 inch right of paper edge
+    draw_dim_line(ax, paper_x + paper_w + 0.5, paper_y, paper_y + paper_h, f"{paper_h}\"", dim_id="D8")
+
     # Clean up
     ax.axis('off')
     
@@ -132,109 +256,34 @@ def draw_blueprint(filename, title, layout_type, orientation,
     print(f"Generated: {filename}")
 
 # ==========================================
-# DEFINING THE 12 LAYOUTS
+# LOAD LAYOUTS FROM JSON
 # ==========================================
 
-layouts = [
-    {
-        "file": "01_ClassicMuseum_Land.png", "title": "Classic Museum - Landscape",
-        "img": (6, 4), "margins": {'top': 2},
-        "txt_dims": (6, 1.75), "txt_pos": {'gap': 1},
-        "notes": "Layout: Classic Museum\nPaper: 8.5x11\nOrientation: Landscape Img\nTop Margin: 2\"\nText Gap: 1\""
-    },
-    {
-        "file": "02_ClassicMuseum_Port.png", "title": "Classic Museum - Portrait",
-        "img": (4, 6), "margins": {'top': 1.5},
-        "txt_dims": (4, 2.5), "txt_pos": {'gap': 0.75},
-        "notes": "Layout: Classic Museum\nPaper: 8.5x11\nOrientation: Portrait Img\nTop Margin: 1.5\"\nText Gap: 0.75\""
-    },
-    {
-        "file": "03_ArtBook_Land.png", "title": "Art Book - Landscape",
-        "img": (6, 4), "margins": {'top': 2, 'right': 1},
-        "txt_dims": (5, 2), "txt_pos": {'bottom_margin': 2},
-        "notes": "Layout: Art Book\nImg: Top Right (2\" Top, 1\" Right)\nTxt: Bottom Left (2\" Bottom, 1\" Left)"
-    },
-    {
-        "file": "04_ArtBook_Port.png", "title": "Art Book - Portrait",
-        "img": (4, 6), "margins": {'top': 1.5, 'right': 1},
-        "txt_dims": (5, 2.5), "txt_pos": {'bottom_margin': 1.5},
-        "notes": "Layout: Art Book\nImg: Top Right (1.5\" Top, 1\" Right)\nTxt: Bottom Left (1.5\" Bottom, 1\" Left)"
-    },
-    {
-        "file": "05_Footer_Land.png", "title": "Footer - Landscape",
-        "img": (6, 4), "margins": {'top': 2.5},
-        "txt_dims": (7.5, 1), "txt_pos": {'bottom_margin': 1},
-        "notes": "Layout: Footer\nImg: Optical Center\nText: Wide Footer (7.5\") anchored 1\" from bottom."
-    },
-    {
-        "file": "06_Footer_Port.png", "title": "Footer - Portrait",
-        "img": (4, 6), "margins": {'top': 2},
-        "txt_dims": (7.5, 1), "txt_pos": {'bottom_margin': 1},
-        "notes": "Layout: Footer\nImg: Optical Center\nText: Wide Footer (7.5\") anchored 1\" from bottom."
-    },
-    {
-        "file": "07_Broadside_Port.png", "title": "Broadside - Portrait",
-        "img": (4, 6), "margins": {'left': 0.75, 'center_v': True},
-        "txt_dims": (2.5, 6), "txt_pos": {}, # Computed in special logic
-        "special": "broadside",
-        "notes": "Layout: Broadside\nImg: Left (0.75\" Margin)\nTxt: Right Column (2.5\" Wide)\nMagazine spread look."
-    },
-    {
-        "file": "08_DoubleCol_Land.png", "title": "Double Column - Landscape",
-        "img": (6, 4), "margins": {'top': 2},
-        "txt_dims": (6, 2), "txt_pos": {'gap': 0.75},
-        "special": "double_col",
-        "notes": "Layout: Double Column\nImg: Centered Top\nTxt: Two 2.75\" columns with 0.5\" gutter."
-    },
-    {
-        "file": "09_VisualAnchor_Land.png", "title": "Visual Anchor - Landscape",
-        "img": (6, 4), "margins": {'top': 2.5},
-        "txt_dims": (6, 1.75), "txt_pos": {'gap': 1},
-        "notes": "Layout: Visual Anchor\nImg: Centered Top (2.5\")\nText: Matches image width."
-    },
-    {
-        "file": "10_VisualAnchor_Port.png", "title": "Visual Anchor - Portrait",
-        "img": (4, 6), "margins": {'top': 2},
-        "txt_dims": (4, 2), "txt_pos": {'gap': 0.75},
-        "notes": "Layout: Visual Anchor\nImg: Centered Top (2\")\nText: Matches image width."
-    },
-    {
-        "file": "11_HighGallery_Land.png", "title": "High Gallery - Landscape",
-        "img": (6, 4), "margins": {'top': 1.5},
-        "txt_dims": (6, 1), "txt_pos": {'bottom_margin': 1.5},
-        "notes": "Layout: High Gallery\nImg: High Center\nTxt: Low Center\nNote the large void in middle."
-    },
-    {
-        "file": "12_HighGallery_Port.png", "title": "High Gallery - Portrait",
-        "img": (4, 6), "margins": {'top': 1.5},
-        "txt_dims": (4, 1), "txt_pos": {'bottom_margin': 1.5},
-        "notes": "Layout: High Gallery\nImg: High Center\nTxt: Low Center\nNote the vertical pause."
-    },
-    {
-        "file": "13_AsymOffset_Land.png", "title": "Asym Offset - Landscape",
-        "img": (6, 4), "margins": {'right': 1, 'center_v': True},
-        "txt_dims": (6, 1.5), "txt_pos": {'gap': 0.5},
-        "special": "asym",
-        "notes": "Layout: Asym Offset\nImg: Pushed Right (1\" margin)\nTxt: Flush Left with Image."
-    },
-    {
-        "file": "14_AsymOffset_Port.png", "title": "Asym Offset - Portrait",
-        "img": (4, 6), "margins": {'right': 1.5, 'center_v': True},
-        "txt_dims": (4, 2), "txt_pos": {'gap': 0.5},
-        "special": "asym",
-        "notes": "Layout: Asym Offset\nImg: Pushed Right (1.5\" margin)\nTxt: Flush Left with Image."
-    }
-]
+def load_layouts(filename='layouts.json'):
+    """Load layout definitions from a JSON file."""
+    try:
+        with open(filename, 'r') as f:
+            return json.load(f)
+    except FileNotFoundError:
+        print(f"Error: Could not find '{filename}'")
+        print("Please ensure the layouts.json file exists in the same directory as this script.")
+        sys.exit(1)
+    except json.JSONDecodeError as e:
+        print(f"Error: Invalid JSON in '{filename}': {e}")
+        sys.exit(1)
 
 # Run Generator
 if __name__ == "__main__":
-    print("Generating 14 Layout Blueprints...")
+    layouts = load_layouts()
+    print(f"Generating {len(layouts)} Layout Blueprints...")
     for layout in layouts:
         draw_blueprint(
             filename=layout['file'],
             title=layout['title'],
             layout_type="Standard",
             orientation="Portrait",
+            paper_w=layout['paper_size'][0],
+            paper_h=layout['paper_size'][1],
             img_w=layout['img'][0],
             img_h=layout['img'][1],
             img_margins=layout['margins'],
