@@ -17,7 +17,7 @@ PAPER_H = 11
 
 DPI = 150  # High resolution for crisp text
 BLUE = '#1E3D59'
-PAPER_COLOR = '#FDFBF7'
+CANVAS_COLOR = '#F2F2F2'
 
 def draw_dim_line(ax, x, y_start, y_end, label, dim_id=None):
     """Draws a vertical dimension line with arrows and optional ID"""
@@ -56,8 +56,8 @@ def draw_blueprint(filename, title, layout_type, orientation,
     fig, ax = plt.subplots(figsize=(BLUEPRINT_W, BLUEPRINT_H), dpi=DPI)
     ax.set_xlim(-1, BLUEPRINT_W - 1)
     ax.set_ylim(-1, BLUEPRINT_H - 1)
-    fig.patch.set_facecolor(PAPER_COLOR)
-    ax.set_facecolor(PAPER_COLOR)
+    fig.patch.set_facecolor(CANVAS_COLOR)
+    ax.set_facecolor(CANVAS_COLOR)
 
     # Draw canvas border (1/4 inch from edge)
     # The axes go from -1 to BLUEPRINT_W-1 and -1 to BLUEPRINT_H-1
