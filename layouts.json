@@ -7,7 +7,7 @@
     "img": [6, 4],
     "margins": {"top": 2},
     "txt_dims": [6, 1.75],
-    "txt_pos": {"gap": 1},
+    "txt_pos": {"left": 1.25, "top": 7.0},
     "notes": "Layout: Classic Museum\nPaper: 8-5x11\nOrientation: Landscape Img\nTop Margin: 2\"\nText Gap: 1\""
   },
   {
@@ -18,7 +18,7 @@
     "img": [4, 6],
     "margins": {"top": 1.5},
     "txt_dims": [4, 2.5],
-    "txt_pos": {"gap": 0.75},
+    "txt_pos": {"left": 2.25, "top": 8.25},
     "notes": "Layout: Classic Museum\nPaper: 8-5x11\nOrientation: Portrait Img\nTop Margin: 1.5\"\nText Gap: 0.75\""
   },
   {
@@ -29,7 +29,7 @@
     "img": [6, 4],
     "margins": {"top": 2, "right": 1},
     "txt_dims": [5, 2],
-    "txt_pos": {"bottom_margin": 2},
+    "txt_pos": {"left": 1.0, "top": 7.0},
     "notes": "Layout: Art Book\nPaper: 8-5x11\nImg: Top Right (2\" Top, 1\" Right)\nTxt: Bottom Left (2\" Bottom, 1\" Left)"
   },
   {
@@ -40,7 +40,7 @@
     "img": [4, 6],
     "margins": {"top": 1.5, "right": 1},
     "txt_dims": [5, 2.5],
-    "txt_pos": {"bottom_margin": 1.5},
+    "txt_pos": {"left": 1.0, "top": 7.0},
     "notes": "Layout: Art Book\nPaper: 8-5x11\nImg: Top Right (1.5\" Top, 1\" Right)\nTxt: Bottom Left (1.5\" Bottom, 1\" Left)"
   },
   {
@@ -51,7 +51,7 @@
     "img": [6, 4],
     "margins": {"top": 2.5},
     "txt_dims": [7.5, 1],
-    "txt_pos": {"bottom_margin": 1},
+    "txt_pos": {"left": 0.5, "top": 9.0},
     "notes": "Layout: Footer\nPaper: 8-5x11\nImg: Optical Center\nText: Wide Footer (7.5\") anchored 1\" from bottom."
   },
   {
@@ -62,7 +62,7 @@
     "img": [4, 6],
     "margins": {"top": 2},
     "txt_dims": [7.5, 1],
-    "txt_pos": {"bottom_margin": 1},
+    "txt_pos": {"left": 0.5, "top": 9.0},
     "notes": "Layout: Footer\nPaper: 8-5x11\nImg: Optical Center\nText: Wide Footer (7.5\") anchored 1\" from bottom."
   },
   {
@@ -73,8 +73,7 @@
     "img": [4, 6],
     "margins": {"left": 0.75, "center_v": true},
     "txt_dims": [2.5, 6],
-    "txt_pos": {},
-    "special": "broadside",
+    "txt_pos": {"left": 5.25, "top": 2.5},
     "notes": "Layout: Broadside\nPaper: 8-5x11\nImg: Left (0.75\" Margin)\nTxt: Right Column (2.5\" Wide)\nMagazine spread look."
   },
   {
@@ -85,7 +84,7 @@
     "img": [6, 4],
     "margins": {"top": 2},
     "txt_dims": [6, 2],
-    "txt_pos": {"gap": 0.75},
+    "txt_pos": {"left": 1.25, "top": 6.75},
     "special": "double_col",
     "notes": "Layout: Double Column\nPaper: 8-5x11\nImg: Centered Top\nTxt: Two 2.75\" columns with 0.5\" gutter."
   },
@@ -97,7 +96,7 @@
     "img": [6, 4],
     "margins": {"top": 2.5},
     "txt_dims": [6, 1.75],
-    "txt_pos": {"gap": 1},
+    "txt_pos": {"left": 1.25, "top": 7.5},
     "notes": "Layout: Visual Anchor\nPaper: 8-5x11\nImg: Centered Top (2.5\")\nText: Matches image width."
   },
   {
@@ -108,7 +107,7 @@
     "img": [4, 6],
     "margins": {"top": 2},
     "txt_dims": [4, 2],
-    "txt_pos": {"gap": 0.75},
+    "txt_pos": {"left": 2.25, "top": 8.75},
     "notes": "Layout: Visual Anchor\nPaper: 8-5x11\nImg: Centered Top (2\")\nText: Matches image width."
   },
   {
@@ -119,7 +118,7 @@
     "img": [6, 4],
     "margins": {"top": 1.5},
     "txt_dims": [6, 1],
-    "txt_pos": {"bottom_margin": 1.5},
+    "txt_pos": {"left": 1.25, "top": 8.5},
     "notes": "Layout: High Gallery\nPaper: 8-5x11\nImg: High Center\nTxt: Low Center\nNote the large void in middle."
   },
   {
@@ -130,7 +129,7 @@
     "img": [4, 6],
     "margins": {"top": 1.5},
     "txt_dims": [4, 1],
-    "txt_pos": {"bottom_margin": 1.5},
+    "txt_pos": {"left": 2.25, "top": 8.5},
     "notes": "Layout: High Gallery\nPaper: 8-5x11\nImg: High Center\nTxt: Low Center\nNote the vertical pause."
   },
   {
@@ -141,8 +140,7 @@
     "img": [6, 4],
     "margins": {"right": 1, "center_v": true},
     "txt_dims": [6, 1.5],
-    "txt_pos": {"gap": 0.5},
-    "special": "asym",
+    "txt_pos": {"left": 1.5, "top": 8.0},
     "notes": "Layout: Asym Offset\nPaper: 8-5x11\nImg: Pushed Right (1\" margin)\nTxt: Flush Left with Image."
   },
   {
@@ -153,8 +151,7 @@
     "img": [4, 6],
     "margins": {"right": 1.5, "center_v": true},
     "txt_dims": [4, 2],
-    "txt_pos": {"gap": 0.5},
-    "special": "asym",
+    "txt_pos": {"left": 3.0, "top": 9.0},
     "notes": "Layout: Asym Offset\nPaper: 8-5x11\nImg: Pushed Right (1.5\" margin)\nTxt: Flush Left with Image."
   },
   {
@@ -165,7 +162,7 @@
     "img": [6, 4],
     "margins": {"top": 3},
     "txt_dims": [6, 2],
-    "txt_pos": {"gap": 1.5},
+    "txt_pos": {"left": 2.5, "top": 8.5},
     "notes": "Layout: Classic Museum\nPaper: 11x14\nOrientation: Landscape Img\nTop Margin: 3\"\nText Gap: 1.5\""
   },
   {
@@ -176,7 +173,7 @@
     "img": [4, 6],
     "margins": {"top": 3},
     "txt_dims": [4, 3],
-    "txt_pos": {"gap": 1.5},
+    "txt_pos": {"left": 3.5, "top": 10.5},
     "notes": "Layout: Classic Museum\nPaper: 11x14\nOrientation: Portrait Img\nTop Margin: 3\"\nText Gap: 1.5\""
   },
   {
@@ -187,7 +184,7 @@
     "img": [6, 4],
     "margins": {"top": 3, "right": 1.5},
     "txt_dims": [4, 3],
-    "txt_pos": {"bottom_margin": 3},
+    "txt_pos": {"left": 1.0, "top": 8.0},
     "notes": "Layout: Art Book\nPaper: 11x14\nImg: Top Right (3\" Top, 1.5\" Right)\nTxt: Bottom Left (3\" Bottom, 1.5\" Left)"
   },
   {
@@ -198,7 +195,7 @@
     "img": [4, 6],
     "margins": {"top": 3, "right": 1.5},
     "txt_dims": [4, 3],
-    "txt_pos": {"bottom_margin": 3},
+    "txt_pos": {"left": 1.0, "top": 8.0},
     "notes": "Layout: Art Book\nPaper: 11x14\nImg: Top Right (3\" Top, 1.5\" Right)\nTxt: Bottom Left (3\" Bottom, 1.5\" Left)"
   },
   {
@@ -209,7 +206,7 @@
     "img": [6, 4],
     "margins": {"top": 3.5},
     "txt_dims": [7, 1],
-    "txt_pos": {"bottom_margin": 1.5},
+    "txt_pos": {"left": 2.0, "top": 11.5},
     "notes": "Layout: Footer\nPaper: 11x14\nImg: Optical Center\nText: Wide Footer (7\") anchored 1.5\" from bottom."
   },
   {
@@ -220,7 +217,7 @@
     "img": [4, 6],
     "margins": {"top": 3.5},
     "txt_dims": [7, 1],
-    "txt_pos": {"bottom_margin": 1.5},
+    "txt_pos": {"left": 2.0, "top": 11.5},
     "notes": "Layout: Footer\nPaper: 11x14\nImg: Optical Center\nText: Wide Footer (7\") anchored 1.5\" from bottom."
   },
   {
@@ -231,8 +228,7 @@
     "img": [4, 6],
     "margins": {"left": 1.5, "center_v": true},
     "txt_dims": [3.5, 6],
-    "txt_pos": {},
-    "special": "broadside",
+    "txt_pos": {"left": 6.75, "top": 4.0},
     "notes": "Layout: Broadside\nPaper: 11x14\nImg: Left (1.5\" Margin)\nTxt: Right Column (3.5\" Wide)\nMagazine spread look."
   },
   {
@@ -243,7 +239,7 @@
     "img": [6, 4],
     "margins": {"top": 3},
     "txt_dims": [6, 2],
-    "txt_pos": {"gap": 1},
+    "txt_pos": {"left": 2.5, "top": 8.0},
     "special": "double_col",
     "notes": "Layout: Double Column\nPaper: 11x14\nImg: Centered Top\nTxt: Two 2.75\" columns with 0.5\" gutter."
   },
@@ -255,7 +251,7 @@
     "img": [6, 4],
     "margins": {"top": 4},
     "txt_dims": [6, 2],
-    "txt_pos": {"gap": 1.25},
+    "txt_pos": {"left": 2.5, "top": 9.25},
     "notes": "Layout: Visual Anchor\nPaper: 11x14\nImg: Centered Top (4\")\nText: Matches image width."
   },
   {
@@ -266,7 +262,7 @@
     "img": [4, 6],
     "margins": {"top": 3},
     "txt_dims": [4, 3],
-    "txt_pos": {"gap": 1.25},
+    "txt_pos": {"left": 3.5, "top": 10.25},
     "notes": "Layout: Visual Anchor\nPaper: 11x14\nImg: Centered Top (3\")\nText: Matches image width."
   },
   {
@@ -277,7 +273,7 @@
     "img": [6, 4],
     "margins": {"top": 2.5},
     "txt_dims": [6, 1],
-    "txt_pos": {"bottom_margin": 2},
+    "txt_pos": {"left": 2.5, "top": 11.0},
     "notes": "Layout: High Gallery\nPaper: 11x14\nImg: High Center\nTxt: Low Center\nNote the large void in middle."
   },
   {
@@ -288,7 +284,7 @@
     "img": [4, 6],
     "margins": {"top": 2.5},
     "txt_dims": [4, 1],
-    "txt_pos": {"bottom_margin": 2},
+    "txt_pos": {"left": 3.5, "top": 11.0},
     "notes": "Layout: High Gallery\nPaper: 11x14\nImg: High Center\nTxt: Low Center\nNote the vertical pause."
   },
   {
@@ -299,8 +295,7 @@
     "img": [6, 4],
     "margins": {"right": 1.5, "center_v": true},
     "txt_dims": [6, 2],
-    "txt_pos": {"gap": 0.5},
-    "special": "asym",
+    "txt_pos": {"left": 3.5, "top": 9.5},
     "notes": "Layout: Asym Offset\nPaper: 11x14\nImg: Pushed Right (1.5\" margin)\nTxt: Flush Left with Image."
   },
   {
@@ -311,8 +306,7 @@
     "img": [4, 6],
     "margins": {"right": 2.5, "center_v": true},
     "txt_dims": [4, 2.5],
-    "txt_pos": {"gap": 0.5},
-    "special": "asym",
+    "txt_pos": {"left": 4.5, "top": 10.5},
     "notes": "Layout: Asym Offset\nPaper: 11x14\nImg: Pushed Right (2.5\" margin)\nTxt: Flush Left with Image."
   }
 ]

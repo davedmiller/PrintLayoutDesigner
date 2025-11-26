@@ -125,28 +125,9 @@ def draw_blueprint(filename, title, layout_type, orientation,
     # --- CALCULATE TEXT POSITION (relative to paper) ---
     txt_w, txt_h = txt_dims
 
-    # Text X Logic
-    if special_mode == 'broadside':
-        txt_x = paper_x + paper_w - 0.75 - txt_w # Right margin 0.75 specific
-    elif special_mode == 'asym':
-        txt_x = img_x # Align flush left with image
-    elif 'left' in img_margins and 'Art Book' in title:
-        txt_x = paper_x + 1 # Specific for Art Book Bottom Left
-    elif 'Art Book' in title: # Landscape Art book
-        txt_x = paper_x + 1
-    else:
-        txt_x = paper_x + (paper_w - txt_w) / 2 # Default Center
-
-    # Text Y Logic
-    if 'gap' in txt_pos_desc:
-        gap = txt_pos_desc['gap']
-        txt_y = img_y - gap - txt_h
-    elif 'bottom_margin' in txt_pos_desc:
-        txt_y = paper_y + txt_pos_desc['bottom_margin']
-    elif special_mode == 'broadside':
-        txt_y = img_y # Align top with image for magazine look
-    else:
-        txt_y = paper_y + 2 # Fallback
+    # Text position from absolute left/top margins
+    txt_x = paper_x + txt_pos_desc['left']
+    txt_y = paper_y + paper_h - txt_pos_desc['top'] - txt_h
 
     # Draw Text Block(s)
     if special_mode == 'double_col':
