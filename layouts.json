@@ -86,6 +86,7 @@
     "txt_dims": [6, 2],
     "txt_pos": {"left": 1.25, "top": 6.75},
     "special": "double_col",
+    "gutter": 0.5,
     "notes": "Layout: Double Column\nPaper: 8-5x11\nImg: Centered Top\nTxt: Two 2.75\" columns with 0.5\" gutter."
   },
   {
@@ -241,6 +242,7 @@
     "txt_dims": [6, 2],
     "txt_pos": {"left": 2.5, "top": 8.0},
     "special": "double_col",
+    "gutter": 0.5,
     "notes": "Layout: Double Column\nPaper: 11x14\nImg: Centered Top\nTxt: Two 2.75\" columns with 0.5\" gutter."
   },
   {

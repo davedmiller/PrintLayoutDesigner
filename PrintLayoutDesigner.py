@@ -45,7 +45,7 @@ def draw_blueprint(filename, title, layout_type, orientation,
                    paper_w, paper_h, black_border,
                    img_w, img_h, img_margins,
                    txt_dims, txt_pos_desc,
-                   notes, special_mode=None):
+                   notes, special_mode=None, gutter=None):
     """
     Generates a single blueprint image.
     paper_w, paper_h = dimensions of the print paper (e.g., 8.5x11 or 11x14)
@@ -132,13 +132,13 @@ def draw_blueprint(filename, title, layout_type, orientation,
     # Draw Text Block(s)
     if special_mode == 'double_col':
         # Split into two columns
-        col_w = (txt_w - 0.5) / 2
+        col_w = (txt_w - gutter) / 2
         col_1 = patches.Rectangle((txt_x, txt_y), col_w, txt_h, ls='--', lw=1, ec=BLUE, fc='none')
-        col_2 = patches.Rectangle((txt_x + col_w + 0.5, txt_y), col_w, txt_h, ls='--', lw=1, ec=BLUE, fc='none')
+        col_2 = patches.Rectangle((txt_x + col_w + gutter, txt_y), col_w, txt_h, ls='--', lw=1, ec=BLUE, fc='none')
         ax.add_patch(col_1)
         ax.add_patch(col_2)
         ax.text(txt_x + col_w/2, txt_y + txt_h/2, "TXT", ha='center', va='center', color=BLUE, fontsize=8, alpha=0.5)
-        ax.text(txt_x + col_w + 0.5 + col_w/2, txt_y + txt_h/2, "TXT", ha='center', va='center', color=BLUE, fontsize=8, alpha=0.5)
+        ax.text(txt_x + col_w + gutter + col_w/2, txt_y + txt_h/2, "TXT", ha='center', va='center', color=BLUE, fontsize=8, alpha=0.5)
     else:
         txt_rect = patches.Rectangle((txt_x, txt_y), txt_w, txt_h, 
                                      linestyle='--', linewidth=1, edgecolor=BLUE, facecolor='none')
@@ -231,6 +231,14 @@ def draw_blueprint(filename, title, layout_type, orientation,
     # Position: 1 inch above paper top (same line as D9)
     draw_horizontal_dim_line(ax, paper_y + paper_h + 1.0, txt_x, txt_x + txt_w, f"{txt_w:.2f}\"", dim_id="D10")
 
+    # D11: Double column gutter width (only for double_col layouts)
+    # Position: 1/2 inch above paper top (same line as D2/D3)
+    if special_mode == 'double_col' and gutter:
+        col_w = (txt_w - gutter) / 2
+        gutter_x_start = txt_x + col_w
+        gutter_x_end = txt_x + col_w + gutter
+        draw_horizontal_dim_line(ax, paper_y + paper_h + 0.5, gutter_x_start, gutter_x_end, f"{gutter:.2f}\"", dim_id="D11")
+
     # D7: Overall paper width
     # Position: 1/2 inch below paper bottom
     draw_horizontal_dim_line(ax, paper_y - 0.5, paper_x, paper_x + paper_w, f"{paper_w}\"", dim_id="D7", offset=0)
@@ -283,6 +291,7 @@ if __name__ == "__main__":
             txt_dims=layout['txt_dims'],
             txt_pos_desc=layout['txt_pos'],
             notes=layout['notes'],
-            special_mode=layout.get('special')
+            special_mode=layout.get('special'),
+            gutter=layout.get('gutter')
         )
     print("Done! Check your folder.")

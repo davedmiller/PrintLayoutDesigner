@@ -16,6 +16,7 @@ This file defines all print layout configurations. Each layout is a JSON object 
 | `txt_pos` | object | Yes | Caption text positioning (see Text Position below) |
 | `notes` | string | Yes | Installation notes displayed in title block |
 | `special` | string | No | Special rendering mode: `"double_col"` splits caption into two columns |
+| `gutter` | number | No | Width of gutter between columns for double_col mode (inches) |
 
 ## Margins Object
 
