@@ -7,6 +7,8 @@ import os
 import sys
 
 # --- CONFIGURATION ---
+VERSION = "1.0.0"
+
 # Blueprint drawing size (the canvas we're drawing on)
 BLUEPRINT_W = 18
 BLUEPRINT_H = 24
@@ -88,7 +90,7 @@ def draw_blueprint(filename, title, layout_type, orientation,
     paper_y = title_block_top + (available_height - paper_h) / 2
 
     # Draw Print Paper Border
-    border = patches.Rectangle((paper_x, paper_y), paper_w, paper_h, linewidth=3, edgecolor=BLUE, facecolor='white')
+    border = patches.Rectangle((paper_x, paper_y), paper_w, paper_h, linewidth=0.8, edgecolor=BLUE, facecolor='white')
     ax.add_patch(border)
 
     # Draw optional black border around paper edge
@@ -97,6 +99,15 @@ def draw_blueprint(filename, title, layout_type, orientation,
                                               linewidth=black_border * DPI / 2,
                                               edgecolor='black', facecolor='none')
         ax.add_patch(black_border_rect)
+
+    # Draw white border indicator (0.5 inch inset from paper edge)
+    white_border_inset = 0.5
+    white_border_rect = patches.Rectangle(
+        (paper_x + white_border_inset, paper_y + white_border_inset),
+        paper_w - 2 * white_border_inset,
+        paper_h - 2 * white_border_inset,
+        linewidth=0.5, edgecolor='#CCCCCC', facecolor='none', linestyle='--')
+    ax.add_patch(white_border_rect)
 
     # --- CALCULATE IMAGE POSITION (relative to paper, not blueprint) ---
     # Default: Center Horizontal if 'left'/'right' not specified in margins
@@ -187,10 +198,22 @@ def draw_blueprint(filename, title, layout_type, orientation,
     caption_right = txt_x + txt_w
 
     # D1: Top Margin Dimension (from top of paper to top of image)
-    # Position: 1/2 inch left of paper edge
+    # Position: 1 inch left of paper edge
     if 'top' in img_margins:
-        d1_x = paper_x - 0.5
+        d1_x = paper_x - 1.0
         draw_dim_line(ax, d1_x, paper_y + paper_h, img_y + img_h, f"{img_margins['top']}\"", dim_id="D1")
+
+    # D13: Image height
+    # Position: 1 inch left of paper edge (same line as D1)
+    d13_x = paper_x - 1.0
+    draw_dim_line(ax, d13_x, img_y, img_y + img_h, f"{img_h:.2f}\"", dim_id="D13")
+
+    # D14: Bottom of image to bottom of paper
+    # Position: 1 inch left of paper edge (same line as D1, D13)
+    img_bottom_margin = img_y - paper_y
+    if img_bottom_margin > 0.1:  # Only show if there's a meaningful margin
+        d14_x = paper_x - 1.0
+        draw_dim_line(ax, d14_x, paper_y, img_y, f"{img_bottom_margin:.2f}\"", dim_id="D14")
 
     # D5: Dimension between bottom of image and top of caption (gap)
     # Position: 1/2 inch left of paper edge (same line as D1)
@@ -200,22 +223,32 @@ def draw_blueprint(filename, title, layout_type, orientation,
         draw_dim_line(ax, d5_x, img_y, caption_top, f"{gap_distance:.2f}\"", dim_id="D5")
 
     # D4: Dimension from top of paper to top of caption
-    # Position: 1 inch left of paper edge
+    # Position: 0.5 inch right of paper edge
     distance_sheet_to_caption = (paper_y + paper_h) - caption_top
-    d4_x = paper_x - 1.0
+    d4_x = paper_x + paper_w + 0.5
     draw_dim_line(ax, d4_x, paper_y + paper_h, caption_top, f"{distance_sheet_to_caption:.2f}\"", dim_id="D4")
 
-    # D6: Caption left margin (from left edge of paper to left edge of caption)
-    # Position: 1 inch left of paper edge (same line as D4)
-    caption_left_margin = caption_left - paper_x
-    if abs(caption_left_margin) > 0.1:  # Only show if there's a meaningful margin
-        d6_x = paper_x - 1.0
-        draw_dim_line(ax, d6_x, caption_bottom, caption_top, f"{caption_left_margin:.2f}\"", dim_id="D6")
+    # D6: Text block height (vertical dimension of caption area)
+    # Position: 0.5 inch right of paper edge (same line as D4)
+    if txt_h > 0.1:  # Only show if there's a meaningful text height
+        d6_x = paper_x + paper_w + 0.5
+        draw_dim_line(ax, d6_x, caption_bottom, caption_top, f"{txt_h:.2f}\"", dim_id="D6")
+
+    # D12: Bottom margin (from bottom of text block to bottom of paper)
+    # Position: 0.5 inch right of paper edge (same line as D4, D6)
+    bottom_margin = txt_y - paper_y
+    if bottom_margin > 0.1:  # Only show if there's a meaningful margin
+        d12_x = paper_x + paper_w + 0.5
+        draw_dim_line(ax, d12_x, paper_y, txt_y, f"{bottom_margin:.2f}\"", dim_id="D12")
 
     # D2: Left Margin Dimension (from left edge of paper to left of image)
     # Position: 1/2 inch above paper top
     left_margin = img_x - paper_x
     draw_horizontal_dim_line(ax, paper_y + paper_h + 0.5, paper_x, img_x, f"{left_margin:.2f}\"", dim_id="D2")
+
+    # D16: Image width
+    # Position: 1/2 inch above paper top (same line as D2)
+    draw_horizontal_dim_line(ax, paper_y + paper_h + 0.5, img_x, img_x + img_w, f"{img_w:.2f}\"", dim_id="D16")
 
     # D3: Right Margin Dimension (from right of image to right edge of paper)
     # Position: 1/2 inch above paper top (same line as D2)
@@ -223,13 +256,19 @@ def draw_blueprint(filename, title, layout_type, orientation,
     draw_horizontal_dim_line(ax, paper_y + paper_h + 0.5, img_x + img_w, paper_x + paper_w, f"{right_margin:.2f}\"", dim_id="D3")
 
     # D9: Text box left edge position (from left edge of paper to left of text box)
-    # Position: 1 inch above paper top
+    # Position: 0.5 inch below paper bottom
     txt_left_margin = txt_x - paper_x
-    draw_horizontal_dim_line(ax, paper_y + paper_h + 1.0, paper_x, txt_x, f"{txt_left_margin:.2f}\"", dim_id="D9")
+    draw_horizontal_dim_line(ax, paper_y - 0.5, paper_x, txt_x, f"{txt_left_margin:.2f}\"", dim_id="D9")
 
     # D10: Text box width
-    # Position: 1 inch above paper top (same line as D9)
-    draw_horizontal_dim_line(ax, paper_y + paper_h + 1.0, txt_x, txt_x + txt_w, f"{txt_w:.2f}\"", dim_id="D10")
+    # Position: 0.5 inch below paper bottom (same line as D9)
+    draw_horizontal_dim_line(ax, paper_y - 0.5, txt_x, txt_x + txt_w, f"{txt_w:.2f}\"", dim_id="D10")
+
+    # D15: Text box right margin (from right edge of text box to right edge of paper)
+    # Position: 0.5 inch below paper bottom (same line as D9, D10)
+    txt_right_margin = (paper_x + paper_w) - (txt_x + txt_w)
+    if txt_right_margin > 0.1:  # Only show if there's a meaningful margin
+        draw_horizontal_dim_line(ax, paper_y - 0.5, txt_x + txt_w, paper_x + paper_w, f"{txt_right_margin:.2f}\"", dim_id="D15")
 
     # D11: Double column gutter width (only for double_col layouts)
     # Position: 1/2 inch above paper top (same line as D2/D3)
@@ -240,12 +279,12 @@ def draw_blueprint(filename, title, layout_type, orientation,
         draw_horizontal_dim_line(ax, paper_y + paper_h + 0.5, gutter_x_start, gutter_x_end, f"{gutter:.2f}\"", dim_id="D11")
 
     # D7: Overall paper width
-    # Position: 1/2 inch below paper bottom
-    draw_horizontal_dim_line(ax, paper_y - 0.5, paper_x, paper_x + paper_w, f"{paper_w}\"", dim_id="D7", offset=0)
+    # Position: 1 inch below paper bottom
+    draw_horizontal_dim_line(ax, paper_y - 1.0, paper_x, paper_x + paper_w, f"{paper_w}\"", dim_id="D7", offset=0)
 
     # D8: Overall paper height
-    # Position: 1/2 inch right of paper edge
-    draw_dim_line(ax, paper_x + paper_w + 0.5, paper_y, paper_y + paper_h, f"{paper_h}\"", dim_id="D8")
+    # Position: 1 inch right of paper edge
+    draw_dim_line(ax, paper_x + paper_w + 1.0, paper_y, paper_y + paper_h, f"{paper_h}\"", dim_id="D8")
 
     # Clean up
     ax.axis('off')
@@ -274,6 +313,7 @@ def load_layouts(filename='layouts.json'):
 
 # Run Generator
 if __name__ == "__main__":
+    print(f"PrintLayoutDesigner v{VERSION}")
     layouts = load_layouts()
     print(f"Generating {len(layouts)} Layout Blueprints...")
     for layout in layouts:
