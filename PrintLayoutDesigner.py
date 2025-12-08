@@ -280,7 +280,7 @@ def draw_canvas(filename, title, layout_type, orientation,
                    caption_dims, caption_pos,
                    notes, special_mode=None, gutter=None, mode="design",
                    image_path_landscape=None, image_path_portrait=None, text_path=None,
-                   font_color=None):
+                   font_color=None, theme_name=None):
     """
     Generates a single canvas image.
     paper_w, paper_h = dimensions of the print paper (e.g., 8.5x11 or 11x14)
@@ -421,7 +421,8 @@ def draw_canvas(filename, title, layout_type, orientation,
         # Title section (left side - 60%)
         ax.text(title_block_x + 0.2, title_block_y + TITLE_BLOCK_H - 0.4, "LAYOUT",
                 fontsize=8, fontweight='bold', color=BLUE)
-        ax.text(title_block_x + 0.2, title_block_y + TITLE_BLOCK_H - 0.8, f"{title.upper()} - FRONT",
+        title_text = f"{title.upper()} - {theme_name.upper()} - FRONT" if theme_name else f"{title.upper()} - FRONT"
+        ax.text(title_block_x + 0.2, title_block_y + TITLE_BLOCK_H - 0.8, title_text,
                 fontsize=12, fontweight='bold', color=BLUE)
         ax.text(title_block_x + 0.2, title_block_y + 1.2, f"Paper Size: {paper_w}\" × {paper_h}\"",
                 fontsize=8, color='#333333')
@@ -554,7 +555,7 @@ def draw_canvas(filename, title, layout_type, orientation,
     print(f"Generated: {output_path}")
 
 def draw_back(filename, title, paper_w, paper_h, paper_style, note_style,
-              note_dims, note_font_color, mode, personal_note_path):
+              note_dims, note_font_color, mode, personal_note_path, theme_name=None):
     """Generate back side with centered personal note.
 
     paper_style = {'background': hex, 'border': {'color': hex, 'width': val}}
@@ -616,7 +617,8 @@ def draw_back(filename, title, paper_w, paper_h, paper_style, note_style,
         # Title section (left side - 60%)
         ax.text(title_block_x + 0.2, title_block_y + TITLE_BLOCK_H - 0.4, "LAYOUT",
                 fontsize=8, fontweight='bold', color=BLUE)
-        ax.text(title_block_x + 0.2, title_block_y + TITLE_BLOCK_H - 0.8, f"{title.upper()} - BACK",
+        title_text = f"{title.upper()} - {theme_name.upper()} - BACK" if theme_name else f"{title.upper()} - BACK"
+        ax.text(title_block_x + 0.2, title_block_y + TITLE_BLOCK_H - 0.8, title_text,
                 fontsize=12, fontweight='bold', color=BLUE)
         ax.text(title_block_x + 0.2, title_block_y + 1.2, f"Paper Size: {paper_w}\" × {paper_h}\"",
                 fontsize=8, color='#333333')
@@ -768,7 +770,8 @@ if __name__ == "__main__":
                     image_path_landscape=image_path_landscape,
                     image_path_portrait=image_path_portrait,
                     text_path=text_path,
-                    font_color=font_color
+                    font_color=font_color,
+                    theme_name=front_theme_name
                 )
 
                 # Generate back side
@@ -783,7 +786,8 @@ if __name__ == "__main__":
                     note_dims=[note_dims['width'], note_dims['height']],
                     note_font_color=back_font_color,
                     mode=mode,
-                    personal_note_path=personal_note_path
+                    personal_note_path=personal_note_path,
+                    theme_name=back_theme_name
                 )
         else:
             print("batch.json found but no entries in batch list.")
