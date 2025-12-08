@@ -2,9 +2,9 @@ Here is a clean, professional `README.md` file summarizing the purpose and usage
 
 -----
 
-# Gallery Layout Blueprint Generator
+# Gallery Layout Generator
 
-A Python utility that generates precise, to-scale architectural blueprint diagrams for photography printing and framing.
+A Python utility that generates precise, to-scale technical diagrams for photography printing and framing.
 
 This tool was created to replace AI image generation for technical diagrams, ensuring that all dimensions, margins, and alignments are mathematically accurate rather than "hallucinated."
 
@@ -12,7 +12,7 @@ This tool was created to replace AI image generation for technical diagrams, ens
 
 This script generates **14 distinct layout variations** for printing photography on **8.5" x 11" (Letter)** paper. It visualizes how a 6x4" (Landscape) or 4x6" (Portrait) image pairs with a 100-word caption block.
 
-The output images are styled as **technical blueprints** (dark blue lines on off-white paper) and include:
+The output images are styled as **technical diagrams** (dark blue lines on off-white canvas) and include:
 
   * To-scale visual representations of the image and text block.
   * Dimension arrows indicating margins.
@@ -69,7 +69,7 @@ You can modify the `layouts` list at the bottom of the script to adjust:
 
   * **Margins:** Change `top`, `left`, or `right` values in inches.
   * **Paper Size:** Modify `FIG_W` and `FIG_H` constants at the top of the script.
-  * **Colors:** Change `BLUE` and `PAPER_COLOR` constants to alter the blueprint aesthetic.
+  * **Colors:** Change `BLUE` and `CANVAS_COLOR` constants to alter the aesthetic.
 
 ## 📄 Output Example
 
