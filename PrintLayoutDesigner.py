@@ -9,7 +9,7 @@ import sys
 import textwrap
 
 # --- CONFIGURATION ---
-VERSION = "2.2.0"
+VERSION = "3.0.0"
 
 # Canvas drawing size
 CANVAS_W = 18
@@ -32,6 +32,108 @@ DEFAULT_BACK_NOTE = {
     "border": {"color": "#000000", "width": 0.0625}
 }
 DEFAULT_BACK_FONT_COLOR = "#000000"
+
+
+# --- THEME AND LAYOUT LOADING ---
+
+def load_theme(theme_name):
+    """Load a theme from themes/{theme_name}.json"""
+    theme_path = os.path.join('themes', f'{theme_name}.json')
+    with open(theme_path, 'r') as f:
+        return json.load(f)
+
+
+def load_layout(layout_name):
+    """Load a layout from layouts/{layout_name}.json"""
+    layout_path = os.path.join('layouts', f'{layout_name}.json')
+    with open(layout_path, 'r') as f:
+        return json.load(f)
+
+
+def resolve_color(theme, style_key):
+    """Resolve a color from theme using the style mapping."""
+    color_role = theme['styles'].get(style_key)
+    if color_role:
+        return theme['colors'].get(color_role)
+    return None
+
+
+def build_style(theme, bg_style_key, border_style_key, border_width):
+    """Build a style object from theme colors and layout border width."""
+    bg_color = resolve_color(theme, bg_style_key)
+    border_color = resolve_color(theme, border_style_key)
+
+    style = {"background": bg_color}
+    if border_width and border_color:
+        style["border"] = {"color": border_color, "width": border_width}
+    else:
+        style["border"] = None
+
+    return style
+
+
+def build_front_styles(layout, theme):
+    """Build front side style objects from layout geometry and theme colors."""
+    front = layout.get('front', {})
+    border_widths = front.get('border_widths', {})
+
+    paper_style = build_style(
+        theme,
+        'paper_background', 'paper_border',
+        border_widths.get('paper')
+    )
+    img_style = build_style(
+        theme,
+        'img_background', 'img_border',
+        border_widths.get('img')
+    )
+    caption_style = build_style(
+        theme,
+        'caption_background', 'caption_border',
+        border_widths.get('caption')
+    )
+    font_color = resolve_color(theme, 'font_color')
+
+    return paper_style, img_style, caption_style, font_color
+
+
+def build_back_styles(layout, theme):
+    """Build back side style objects from layout geometry and theme colors."""
+    back = layout.get('back', {})
+    border_widths = back.get('border_widths', {})
+
+    paper_style = build_style(
+        theme,
+        'paper_background', 'paper_border',
+        border_widths.get('paper')
+    )
+    note_style = build_style(
+        theme,
+        'note_background', 'note_border',
+        border_widths.get('note')
+    )
+    font_color = resolve_color(theme, 'font_color')
+
+    return paper_style, note_style, font_color
+
+
+def load_batch(filename='batch.json'):
+    """Load batch configuration from JSON file.
+
+    Returns (batch_entries, mode, image_path_landscape, image_path_portrait, text_path, personal_note_path).
+    """
+    with open(filename, 'r') as f:
+        data = json.load(f)
+
+    return (
+        data.get('batch', []),
+        data.get('mode', 'design'),
+        data.get('image_path_landscape'),
+        data.get('image_path_portrait'),
+        data.get('text_path'),
+        data.get('personal_note_path')
+    )
+
 
 def draw_border_inset(ax, x, y, w, h, border, fill_color):
     """Draw inset border: filled rect at outer size, then fill_color rect inset."""
@@ -614,58 +716,132 @@ def load_layouts(filename='layouts.json'):
 if __name__ == "__main__":
     print(f"PrintLayoutDesigner v{VERSION}")
 
-    layouts, mode, image_path_landscape, image_path_portrait, text_path, personal_note_path = load_layouts()
-    print(f"Generating {len(layouts)} layouts (front + back) in {mode} mode...")
-    for layout in layouts:
-        # Generate front and back filenames from base filename
-        base_filename = layout['file']
-        if base_filename.endswith('.png'):
-            base = base_filename[:-4]
-            front_filename = f"{base}_front.png"
-            back_filename = f"{base}_back.png"
+    # Try batch.json first, fall back to layouts.json
+    if os.path.exists('batch.json'):
+        batch_entries, mode, image_path_landscape, image_path_portrait, text_path, personal_note_path = load_batch()
+
+        if batch_entries:
+            # New batch mode: use themes
+            print(f"Generating {len(batch_entries)} batch entries (front + back) in {mode} mode...")
+            for entry in batch_entries:
+                layout_name = entry['layout']
+                front_theme_name = entry['front_theme']
+                back_theme_name = entry['back_theme']
+
+                # Load layout and themes
+                layout = load_layout(layout_name)
+                front_theme = load_theme(front_theme_name)
+                back_theme = load_theme(back_theme_name)
+
+                # Build styles from theme + layout
+                paper_style, img_style, caption_style, font_color = build_front_styles(layout, front_theme)
+                back_paper_style, back_note_style, back_font_color = build_back_styles(layout, back_theme)
+
+                # Extract geometry from layout
+                front = layout.get('front', {})
+                back = layout.get('back', {})
+
+                # Generate filenames
+                front_filename = f"{layout_name}_{front_theme_name}_front.png"
+                back_filename = f"{layout_name}_{back_theme_name}_back.png"
+
+                # Generate front side
+                draw_canvas(
+                    filename=front_filename,
+                    title=layout.get('title', layout_name),
+                    layout_type="Standard",
+                    orientation="Portrait",
+                    paper_w=layout['paper_size']['width'],
+                    paper_h=layout['paper_size']['height'],
+                    paper_style=paper_style,
+                    img_style=img_style,
+                    caption_style=caption_style,
+                    img_w=front['img_dims']['width'],
+                    img_h=front['img_dims']['height'],
+                    img_margins={'left': front['img_pos']['left'], 'top': front['img_pos']['top']},
+                    caption_dims=[front['caption_dims']['width'], front['caption_dims']['height']],
+                    caption_pos=front['caption_pos'],
+                    notes=layout.get('notes', ''),
+                    special_mode=front.get('special'),
+                    gutter=front.get('gutter'),
+                    mode=mode,
+                    image_path_landscape=image_path_landscape,
+                    image_path_portrait=image_path_portrait,
+                    text_path=text_path,
+                    font_color=font_color
+                )
+
+                # Generate back side
+                note_dims = back.get('note_dims', {'width': 6, 'height': 9})
+                draw_back(
+                    filename=back_filename,
+                    title=layout.get('title', layout_name),
+                    paper_w=layout['paper_size']['width'],
+                    paper_h=layout['paper_size']['height'],
+                    paper_style=back_paper_style,
+                    note_style=back_note_style,
+                    note_dims=[note_dims['width'], note_dims['height']],
+                    note_font_color=back_font_color,
+                    mode=mode,
+                    personal_note_path=personal_note_path
+                )
         else:
-            front_filename = f"{base_filename}_front"
-            back_filename = f"{base_filename}_back"
+            print("batch.json found but no entries in batch list.")
+            print("Add entries like: {\"layout\": \"01_ClassicMuseum_Land_8-5x11\", \"front_theme\": \"Christmas-2_light\", \"back_theme\": \"Christmas-2_light\"}")
+    else:
+        # Legacy mode: use layouts.json with embedded styles
+        layouts, mode, image_path_landscape, image_path_portrait, text_path, personal_note_path = load_layouts()
+        print(f"Generating {len(layouts)} layouts (front + back) in {mode} mode...")
+        for layout in layouts:
+            # Generate front and back filenames from base filename
+            base_filename = layout['file']
+            if base_filename.endswith('.png'):
+                base = base_filename[:-4]
+                front_filename = f"{base}_front.png"
+                back_filename = f"{base}_back.png"
+            else:
+                front_filename = f"{base_filename}_front"
+                back_filename = f"{base_filename}_back"
 
-        # Generate front side
-        draw_canvas(
-            filename=front_filename,
-            title=layout['title'],
-            layout_type="Standard",
-            orientation="Portrait",
-            paper_w=layout['paper_size']['width'],
-            paper_h=layout['paper_size']['height'],
-            paper_style=layout.get('paper_style', {}),
-            img_style=layout.get('img_style', {}),
-            caption_style=layout.get('caption_style', {}),
-            img_w=layout['img_dims']['width'],
-            img_h=layout['img_dims']['height'],
-            img_margins={'left': layout['img_pos']['left'], 'top': layout['img_pos']['top']},
-            caption_dims=[layout['caption_dims']['width'], layout['caption_dims']['height']],
-            caption_pos=layout['caption_pos'],
-            notes=layout['notes'],
-            special_mode=layout.get('special'),
-            gutter=layout.get('gutter'),
-            mode=mode,
-            image_path_landscape=image_path_landscape,
-            image_path_portrait=image_path_portrait,
-            text_path=text_path,
-            font_color=layout.get('font_color')
-        )
+            # Generate front side
+            draw_canvas(
+                filename=front_filename,
+                title=layout['title'],
+                layout_type="Standard",
+                orientation="Portrait",
+                paper_w=layout['paper_size']['width'],
+                paper_h=layout['paper_size']['height'],
+                paper_style=layout.get('paper_style', {}),
+                img_style=layout.get('img_style', {}),
+                caption_style=layout.get('caption_style', {}),
+                img_w=layout['img_dims']['width'],
+                img_h=layout['img_dims']['height'],
+                img_margins={'left': layout['img_pos']['left'], 'top': layout['img_pos']['top']},
+                caption_dims=[layout['caption_dims']['width'], layout['caption_dims']['height']],
+                caption_pos=layout['caption_pos'],
+                notes=layout['notes'],
+                special_mode=layout.get('special'),
+                gutter=layout.get('gutter'),
+                mode=mode,
+                image_path_landscape=image_path_landscape,
+                image_path_portrait=image_path_portrait,
+                text_path=text_path,
+                font_color=layout.get('font_color')
+            )
 
-        # Generate back side
-        back_note_dims = layout.get('back_note_dims') or {'width': 6, 'height': 9}
-        draw_back(
-            filename=back_filename,
-            title=layout['title'],
-            paper_w=layout['paper_size']['width'],
-            paper_h=layout['paper_size']['height'],
-            paper_style=layout.get('back_paper_style') or DEFAULT_BACK_PAPER,
-            note_style=layout.get('back_note_style') or DEFAULT_BACK_NOTE,
-            note_dims=[back_note_dims['width'], back_note_dims['height']],
-            note_font_color=layout.get('back_note_font_color') or DEFAULT_BACK_FONT_COLOR,
-            mode=mode,
-            personal_note_path=personal_note_path
-        )
+            # Generate back side
+            back_note_dims = layout.get('back_note_dims') or {'width': 6, 'height': 9}
+            draw_back(
+                filename=back_filename,
+                title=layout['title'],
+                paper_w=layout['paper_size']['width'],
+                paper_h=layout['paper_size']['height'],
+                paper_style=layout.get('back_paper_style') or DEFAULT_BACK_PAPER,
+                note_style=layout.get('back_note_style') or DEFAULT_BACK_NOTE,
+                note_dims=[back_note_dims['width'], back_note_dims['height']],
+                note_font_color=layout.get('back_note_font_color') or DEFAULT_BACK_FONT_COLOR,
+                mode=mode,
+                personal_note_path=personal_note_path
+            )
 
     print("Done! Check your folder.")
