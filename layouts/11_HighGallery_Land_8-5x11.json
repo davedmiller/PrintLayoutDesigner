@@ -1,0 +1,45 @@
+{
+  "name": "11_HighGallery_Land_8-5x11",
+  "title": "High Gallery - Landscape",
+  "paper_size": {
+    "width": 8.5,
+    "height": 11
+  },
+  "front": {
+    "img_dims": {
+      "width": 6,
+      "height": 4
+    },
+    "img_pos": {
+      "left": 1.25,
+      "top": 1.5
+    },
+    "caption_dims": {
+      "width": 6,
+      "height": 1
+    },
+    "caption_pos": {
+      "left": 1.25,
+      "top": 8.5
+    },
+    "special": null,
+    "gutter": null,
+    "border_widths": {
+      "paper": null,
+      "img": null,
+      "caption": null
+    }
+  },
+  "back": {
+    "note_dims": {
+      "width": 6,
+      "height": 9
+    },
+    "note_pos": "centered",
+    "border_widths": {
+      "paper": null,
+      "note": null
+    }
+  },
+  "notes": "Layout: High Gallery\nPaper: 8-5x11\nImg: High Center\nTxt: Low Center\nNote the large void in middle."
+}

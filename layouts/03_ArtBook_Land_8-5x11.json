@@ -1,0 +1,45 @@
+{
+  "name": "03_ArtBook_Land_8-5x11",
+  "title": "Art Book - Landscape",
+  "paper_size": {
+    "width": 8.5,
+    "height": 11
+  },
+  "front": {
+    "img_dims": {
+      "width": 6,
+      "height": 4
+    },
+    "img_pos": {
+      "left": 1.5,
+      "top": 2
+    },
+    "caption_dims": {
+      "width": 5,
+      "height": 2
+    },
+    "caption_pos": {
+      "left": 1.0,
+      "top": 7.0
+    },
+    "special": null,
+    "gutter": null,
+    "border_widths": {
+      "paper": 0.25,
+      "img": 0.1875,
+      "caption": 0.1875
+    }
+  },
+  "back": {
+    "note_dims": {
+      "width": 6,
+      "height": 9
+    },
+    "note_pos": "centered",
+    "border_widths": {
+      "paper": 0.25,
+      "note": 0.0625
+    }
+  },
+  "notes": "Layout: Art Book\nPaper: 8-5x11\nImg: Top Right (2\" Top, 1\" Right)\nTxt: Bottom Left (2\" Bottom, 1\" Left)"
+}

@@ -1,0 +1,45 @@
+{
+  "name": "09_VisualAnchor_Land_8-5x11",
+  "title": "Visual Anchor - Landscape",
+  "paper_size": {
+    "width": 8.5,
+    "height": 11
+  },
+  "front": {
+    "img_dims": {
+      "width": 6,
+      "height": 4
+    },
+    "img_pos": {
+      "left": 1.25,
+      "top": 2.25
+    },
+    "caption_dims": {
+      "width": 6,
+      "height": 1.75
+    },
+    "caption_pos": {
+      "left": 1.25,
+      "top": 7.25
+    },
+    "special": null,
+    "gutter": null,
+    "border_widths": {
+      "paper": 0.5,
+      "img": null,
+      "caption": 0.0625
+    }
+  },
+  "back": {
+    "note_dims": {
+      "width": 6,
+      "height": 9
+    },
+    "note_pos": "centered",
+    "border_widths": {
+      "paper": null,
+      "note": null
+    }
+  },
+  "notes": "Layout: Visual Anchor\nPaper: 8-5x11\nImg: Centered Top (2.5\")\nText: Matches image width."
+}

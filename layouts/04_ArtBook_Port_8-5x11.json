@@ -1,0 +1,45 @@
+{
+  "name": "04_ArtBook_Port_8-5x11",
+  "title": "Art Book - Portrait",
+  "paper_size": {
+    "width": 8.5,
+    "height": 11
+  },
+  "front": {
+    "img_dims": {
+      "width": 4,
+      "height": 6
+    },
+    "img_pos": {
+      "left": 3.5,
+      "top": 1.0
+    },
+    "caption_dims": {
+      "width": 5,
+      "height": 2.5
+    },
+    "caption_pos": {
+      "left": 1.0,
+      "top": 7.5
+    },
+    "special": null,
+    "gutter": null,
+    "border_widths": {
+      "paper": null,
+      "img": 0.125,
+      "caption": null
+    }
+  },
+  "back": {
+    "note_dims": {
+      "width": 6,
+      "height": 9
+    },
+    "note_pos": "centered",
+    "border_widths": {
+      "paper": null,
+      "note": null
+    }
+  },
+  "notes": "Layout: Art Book\nPaper: 8-5x11\nImg: Top Right (1.5\" Top, 1\" Right)\nTxt: Bottom Left (1.5\" Bottom, 1\" Left)"
+}

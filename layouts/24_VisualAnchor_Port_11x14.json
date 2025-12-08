@@ -1,0 +1,45 @@
+{
+  "name": "24_VisualAnchor_Port_11x14",
+  "title": "Visual Anchor - Portrait",
+  "paper_size": {
+    "width": 11,
+    "height": 14
+  },
+  "front": {
+    "img_dims": {
+      "width": 4,
+      "height": 6
+    },
+    "img_pos": {
+      "left": 3.5,
+      "top": 3
+    },
+    "caption_dims": {
+      "width": 4,
+      "height": 3
+    },
+    "caption_pos": {
+      "left": 3.5,
+      "top": 10.25
+    },
+    "special": null,
+    "gutter": null,
+    "border_widths": {
+      "paper": 0.5,
+      "img": null,
+      "caption": null
+    }
+  },
+  "back": {
+    "note_dims": {
+      "width": 7,
+      "height": 10
+    },
+    "note_pos": "centered",
+    "border_widths": {
+      "paper": null,
+      "note": null
+    }
+  },
+  "notes": "Layout: Visual Anchor\nPaper: 11x14\nImg: Centered Top (3\")\nText: Matches image width."
+}

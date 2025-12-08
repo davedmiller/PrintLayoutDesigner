@@ -1,0 +1,23 @@
+{
+  "name": "Close-up-of-blue-denim-jeans-fabric-texture-background",
+  "source": "adobe-color",
+  "mode": "light",
+  "colors": {
+    "background": "#639CBF",
+    "base": "#122A40",
+    "secondary": "#122A40",
+    "accent": "#122A40",
+    "text": "#122A40"
+  },
+  "styles": {
+    "paper_background": "background",
+    "paper_border": "base",
+    "img_background": "secondary",
+    "img_border": "accent",
+    "caption_background": "secondary",
+    "caption_border": "accent",
+    "note_background": "secondary",
+    "note_border": "accent",
+    "font_color": "text"
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "name": "02_ClassicMuseum_Port_8-5x11",
+  "title": "Classic Museum - Portrait",
+  "paper_size": {
+    "width": 8.5,
+    "height": 11
+  },
+  "front": {
+    "img_dims": {
+      "width": 4,
+      "height": 6
+    },
+    "img_pos": {
+      "left": 2.25,
+      "top": 0.875
+    },
+    "caption_dims": {
+      "width": 4,
+      "height": 2.5
+    },
+    "caption_pos": {
+      "left": 2.25,
+      "top": 7.625
+    },
+    "special": null,
+    "gutter": null,
+    "border_widths": {
+      "paper": null,
+      "img": 0.0625,
+      "caption": 0.0625
+    }
+  },
+  "back": {
+    "note_dims": {
+      "width": 6,
+      "height": 9
+    },
+    "note_pos": "centered",
+    "border_widths": {
+      "paper": null,
+      "note": null
+    }
+  },
+  "notes": "Layout: Classic Museum\nPaper: 8-5x11\nOrientation: Portrait Img\nTop Margin: 1.5\"\nText Gap: 0.75\""
+}

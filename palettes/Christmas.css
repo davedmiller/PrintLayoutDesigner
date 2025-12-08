@@ -1,0 +1,20 @@
+/* Color Theme Swatches in Hex */
+.Christmas-2-1-hex { color: #F2F2F2; }
+.Christmas-2-2-hex { color: #537334; }
+.Christmas-2-3-hex { color: #A69F3C; }
+.Christmas-2-4-hex { color: #D93829; }
+.Christmas-2-5-hex { color: #F22E2E; }
+
+/* Color Theme Swatches in RGBA */
+.Christmas-2-1-rgba { color: rgba(242, 242, 242, 1); }
+.Christmas-2-2-rgba { color: rgba(82, 114, 52, 1); }
+.Christmas-2-3-rgba { color: rgba(165, 158, 59, 1); }
+.Christmas-2-4-rgba { color: rgba(216, 56, 40, 1); }
+.Christmas-2-5-rgba { color: rgba(242, 45, 45, 1); }
+
+/* Color Theme Swatches in HSLA */
+.Christmas-2-1-hsla { color: hsla(0, 0, 94, 1); }
+.Christmas-2-2-hsla { color: hsla(90, 37, 32, 1); }
+.Christmas-2-3-hsla { color: hsla(56, 46, 44, 1); }
+.Christmas-2-4-hsla { color: hsla(5, 69, 50, 1); }
+.Christmas-2-5-hsla { color: hsla(0, 88, 56, 1); }

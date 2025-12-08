@@ -1,0 +1,45 @@
+{
+  "name": "15_ClassicMuseum_Land_11x14",
+  "title": "Classic Museum - Landscape",
+  "paper_size": {
+    "width": 11,
+    "height": 14
+  },
+  "front": {
+    "img_dims": {
+      "width": 6,
+      "height": 4
+    },
+    "img_pos": {
+      "left": 2.5,
+      "top": 3
+    },
+    "caption_dims": {
+      "width": 6,
+      "height": 2
+    },
+    "caption_pos": {
+      "left": 2.5,
+      "top": 8.5
+    },
+    "special": null,
+    "gutter": null,
+    "border_widths": {
+      "paper": 0.75,
+      "img": 0.1875,
+      "caption": null
+    }
+  },
+  "back": {
+    "note_dims": {
+      "width": 7,
+      "height": 10
+    },
+    "note_pos": "centered",
+    "border_widths": {
+      "paper": 0.5,
+      "note": 0.0625
+    }
+  },
+  "notes": "Layout: Classic Museum\nPaper: 11x14\nOrientation: Landscape Img\nTop Margin: 3\"\nText Gap: 1.5\""
+}

@@ -1,0 +1,23 @@
+{
+  "name": "Modern-concrete-house-in-a-desert-landscape",
+  "source": "adobe-color",
+  "mode": "light",
+  "colors": {
+    "background": "#F2F2F2",
+    "base": "#A4A5A6",
+    "secondary": "#D7D7D9",
+    "accent": "#575859",
+    "text": "#262626"
+  },
+  "styles": {
+    "paper_background": "background",
+    "paper_border": "base",
+    "img_background": "secondary",
+    "img_border": "accent",
+    "caption_background": "secondary",
+    "caption_border": "accent",
+    "note_background": "secondary",
+    "note_border": "accent",
+    "font_color": "text"
+  }
+}

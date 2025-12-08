@@ -1,0 +1,45 @@
+{
+  "name": "13_AsymOffset_Land_8-5x11",
+  "title": "Asym Offset - Landscape",
+  "paper_size": {
+    "width": 8.5,
+    "height": 11
+  },
+  "front": {
+    "img_dims": {
+      "width": 6,
+      "height": 4
+    },
+    "img_pos": {
+      "left": 1.5,
+      "top": 1.5
+    },
+    "caption_dims": {
+      "width": 2.5,
+      "height": 3.5
+    },
+    "caption_pos": {
+      "left": 1.5,
+      "top": 6.5
+    },
+    "special": null,
+    "gutter": null,
+    "border_widths": {
+      "paper": 0.5,
+      "img": null,
+      "caption": null
+    }
+  },
+  "back": {
+    "note_dims": {
+      "width": 6,
+      "height": 9
+    },
+    "note_pos": "centered",
+    "border_widths": {
+      "paper": null,
+      "note": null
+    }
+  },
+  "notes": "Layout: Asym Offset\nPaper: 8-5x11\nImg: Pushed Right (1\" margin)\nTxt: Flush Left with Image."
+}

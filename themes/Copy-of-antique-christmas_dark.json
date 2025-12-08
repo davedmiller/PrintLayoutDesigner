@@ -1,0 +1,23 @@
+{
+  "name": "Copy-of-antique-christmas",
+  "source": "adobe-color",
+  "mode": "dark",
+  "colors": {
+    "background": "#730202",
+    "base": "#E8E4C1",
+    "secondary": "#A60303",
+    "accent": "#467847",
+    "text": "#E4FAFF"
+  },
+  "styles": {
+    "paper_background": "background",
+    "paper_border": "base",
+    "img_background": "secondary",
+    "img_border": "accent",
+    "caption_background": "secondary",
+    "caption_border": "accent",
+    "note_background": "secondary",
+    "note_border": "accent",
+    "font_color": "text"
+  }
+}
