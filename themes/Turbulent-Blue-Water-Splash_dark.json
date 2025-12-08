@@ -1,13 +1,13 @@
 {
-  "name": "Copy-of-antique-christmas",
+  "name": "Turbulent-Blue-Water-Splash",
   "source": "adobe-color",
-  "mode": "light",
+  "mode": "dark",
   "colors": {
-    "background": "#E4FAFF",
-    "base": "#E8E4C1",
-    "secondary": "#467847",
-    "accent": "#A60303",
-    "text": "#730202"
+    "background": "#306073",
+    "base": "#3B6D8C",
+    "secondary": "#688EA6",
+    "accent": "#B0C1D9",
+    "text": "#F1E4F2"
   },
   "styles": {
     "paper_background": "background",

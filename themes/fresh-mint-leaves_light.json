@@ -1,13 +1,13 @@
 {
-  "name": "Set-of-fresh-mint-leaves-cut-out",
+  "name": "fresh-mint-leaves",
   "source": "adobe-color",
-  "mode": "dark",
+  "mode": "light",
   "colors": {
-    "background": "#447316",
+    "background": "#F2F2F2",
     "base": "#84BF2A",
-    "secondary": "#6FA638",
-    "accent": "#B9D989",
-    "text": "#F2F2F2"
+    "secondary": "#B9D989",
+    "accent": "#6FA638",
+    "text": "#447316"
   },
   "styles": {
     "paper_background": "background",

@@ -1,13 +1,13 @@
 {
-  "name": "Golden-starfish-on-a-sandy-beach-with-foamy-waves-and-a-bright-blue-sky",
+  "name": "Blue Denim Jeans",
   "source": "adobe-color",
   "mode": "dark",
   "colors": {
-    "background": "#0F5FA6",
-    "base": "#1F92BF",
-    "secondary": "#177FBF",
-    "accent": "#D9B88F",
-    "text": "#ACE5F2"
+    "background": "#122A40",
+    "base": "#30588C",
+    "secondary": "#1B3659",
+    "accent": "#37648C",
+    "text": "#639CBF"
   },
   "styles": {
     "paper_background": "background",

@@ -1,13 +1,13 @@
 {
-  "name": "Modern-concrete-house-in-a-desert-landscape",
+  "name": "Blue Denim Jeans",
   "source": "adobe-color",
   "mode": "light",
   "colors": {
-    "background": "#F2F2F2",
-    "base": "#A4A5A6",
-    "secondary": "#D7D7D9",
-    "accent": "#575859",
-    "text": "#262626"
+    "background": "#639CBF",
+    "base": "#30588C",
+    "secondary": "#37648C",
+    "accent": "#1B3659",
+    "text": "#122A40"
   },
   "styles": {
     "paper_background": "background",

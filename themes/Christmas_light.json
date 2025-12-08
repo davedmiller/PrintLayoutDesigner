@@ -1,13 +1,13 @@
 {
-  "name": "Abstract-Blue-Water-Splash-with-Turbulent-Foam-in-Ocean-Scene",
+  "name": "Christmas",
   "source": "adobe-color",
   "mode": "light",
   "colors": {
-    "background": "#F1E4F2",
-    "base": "#3B6D8C",
-    "secondary": "#B0C1D9",
-    "accent": "#688EA6",
-    "text": "#306073"
+    "background": "#F2F2F2",
+    "base": "#A69F3C",
+    "secondary": "#F22E2E",
+    "accent": "#D93829",
+    "text": "#537334"
   },
   "styles": {
     "paper_background": "background",

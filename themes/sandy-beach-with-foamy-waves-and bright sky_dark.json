@@ -1,13 +1,13 @@
 {
-  "name": "Set-of-fresh-mint-leaves-cut-out",
+  "name": "sandy-beach-with-foamy-waves-and bright sky",
   "source": "adobe-color",
-  "mode": "light",
+  "mode": "dark",
   "colors": {
-    "background": "#F2F2F2",
-    "base": "#84BF2A",
-    "secondary": "#B9D989",
-    "accent": "#6FA638",
-    "text": "#447316"
+    "background": "#0F5FA6",
+    "base": "#1F92BF",
+    "secondary": "#177FBF",
+    "accent": "#D9B88F",
+    "text": "#ACE5F2"
   },
   "styles": {
     "paper_background": "background",

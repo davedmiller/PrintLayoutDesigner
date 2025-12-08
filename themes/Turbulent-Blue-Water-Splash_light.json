@@ -1,13 +1,13 @@
 {
-  "name": "Close-up-of-blue-denim-jeans-fabric-texture-background",
+  "name": "Turbulent-Blue-Water-Splash",
   "source": "adobe-color",
-  "mode": "dark",
+  "mode": "light",
   "colors": {
-    "background": "#122A40",
-    "base": "#122A40",
-    "secondary": "#122A40",
-    "accent": "#122A40",
-    "text": "#639CBF"
+    "background": "#F1E4F2",
+    "base": "#3B6D8C",
+    "secondary": "#B0C1D9",
+    "accent": "#688EA6",
+    "text": "#306073"
   },
   "styles": {
     "paper_background": "background",

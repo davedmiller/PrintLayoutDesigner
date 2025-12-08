@@ -743,9 +743,9 @@ if __name__ == "__main__":
                 front = layout.get('front', {})
                 back = layout.get('back', {})
 
-                # Generate filenames
-                front_filename = f"{layout_name}_{front_theme_name}_front.png"
-                back_filename = f"{layout_name}_{back_theme_name}_back.png"
+                # Generate filenames: number_layout_size_side_theme.png
+                front_filename = f"{layout_name}_front_{front_theme_name}.png"
+                back_filename = f"{layout_name}_back_{back_theme_name}.png"
 
                 # Generate front side
                 draw_canvas(

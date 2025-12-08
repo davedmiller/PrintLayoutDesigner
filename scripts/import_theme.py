@@ -128,11 +128,14 @@ def import_palette(css_path):
     with open(css_path, 'r') as f:
         css_content = f.read()
 
-    theme_name, colors = parse_adobe_css(css_content)
+    _, colors = parse_adobe_css(css_content)
 
-    if theme_name is None:
+    if not colors:
         print(f"Warning: Could not parse {css_path}")
         return []
+
+    # Use filename (without path/extension) as theme name
+    theme_name = os.path.splitext(os.path.basename(css_path))[0]
 
     os.makedirs('themes', exist_ok=True)
     created = []

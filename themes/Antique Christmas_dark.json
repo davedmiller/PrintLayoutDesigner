@@ -1,13 +1,13 @@
 {
-  "name": "Close-up-of-blue-denim-jeans-fabric-texture-background",
+  "name": "Antique Christmas",
   "source": "adobe-color",
-  "mode": "light",
+  "mode": "dark",
   "colors": {
-    "background": "#639CBF",
-    "base": "#122A40",
-    "secondary": "#122A40",
-    "accent": "#122A40",
-    "text": "#122A40"
+    "background": "#730202",
+    "base": "#E8E4C1",
+    "secondary": "#A60303",
+    "accent": "#467847",
+    "text": "#E4FAFF"
   },
   "styles": {
     "paper_background": "background",

@@ -1,12 +1,12 @@
 {
-  "name": "Christmas-2",
+  "name": "Modern-concrete-house",
   "source": "adobe-color",
   "mode": "dark",
   "colors": {
-    "background": "#537334",
-    "base": "#A69F3C",
-    "secondary": "#D93829",
-    "accent": "#F22E2E",
+    "background": "#262626",
+    "base": "#A4A5A6",
+    "secondary": "#575859",
+    "accent": "#D7D7D9",
     "text": "#F2F2F2"
   },
   "styles": {
