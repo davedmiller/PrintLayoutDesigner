@@ -25,6 +25,14 @@ CANVAS_COLOR = '#F2F2F2'
 BORDER_MARGIN = 0.25  # Canvas border margin
 TITLE_BLOCK_H = 2.5  # Title block height
 
+# Default back side styles (used when back_* fields are null/missing)
+DEFAULT_BACK_PAPER = {"background": "#FFFFFF", "border": None}
+DEFAULT_BACK_NOTE = {
+    "background": "#FFFFFF",
+    "border": {"color": "#000000", "width": 0.0625}
+}
+DEFAULT_BACK_FONT_COLOR = "#000000"
+
 def draw_border_inset(ax, x, y, w, h, border, fill_color):
     """Draw inset border: filled rect at outer size, then fill_color rect inset."""
     if not border:
@@ -311,7 +319,7 @@ def draw_canvas(filename, title, layout_type, orientation,
         # Title section (left side - 60%)
         ax.text(title_block_x + 0.2, title_block_y + TITLE_BLOCK_H - 0.4, "LAYOUT",
                 fontsize=8, fontweight='bold', color=BLUE)
-        ax.text(title_block_x + 0.2, title_block_y + TITLE_BLOCK_H - 0.8, title.upper(),
+        ax.text(title_block_x + 0.2, title_block_y + TITLE_BLOCK_H - 0.8, f"{title.upper()} - FRONT",
                 fontsize=12, fontweight='bold', color=BLUE)
         ax.text(title_block_x + 0.2, title_block_y + 1.2, f"Paper Size: {paper_w}\" × {paper_h}\"",
                 fontsize=8, color='#333333')
@@ -504,9 +512,9 @@ def draw_back(filename, title, paper_w, paper_h, paper_style, note_style,
                 color=BLUE, linewidth=1.5)
 
         # Title section (left side - 60%)
-        ax.text(title_block_x + 0.2, title_block_y + TITLE_BLOCK_H - 0.4, "LAYOUT (BACK)",
+        ax.text(title_block_x + 0.2, title_block_y + TITLE_BLOCK_H - 0.4, "LAYOUT",
                 fontsize=8, fontweight='bold', color=BLUE)
-        ax.text(title_block_x + 0.2, title_block_y + TITLE_BLOCK_H - 0.8, title.upper(),
+        ax.text(title_block_x + 0.2, title_block_y + TITLE_BLOCK_H - 0.8, f"{title.upper()} - BACK",
                 fontsize=12, fontweight='bold', color=BLUE)
         ax.text(title_block_x + 0.2, title_block_y + 1.2, f"Paper Size: {paper_w}\" × {paper_h}\"",
                 fontsize=8, color='#333333')
@@ -652,10 +660,10 @@ if __name__ == "__main__":
             title=layout['title'],
             paper_w=layout['paper_size']['width'],
             paper_h=layout['paper_size']['height'],
-            paper_style=layout.get('back_paper_style') or layout.get('paper_style') or {},
-            note_style=layout.get('back_note_style') or {},
+            paper_style=layout.get('back_paper_style') or DEFAULT_BACK_PAPER,
+            note_style=layout.get('back_note_style') or DEFAULT_BACK_NOTE,
             note_dims=[back_note_dims['width'], back_note_dims['height']],
-            note_font_color=layout.get('back_note_font_color'),
+            note_font_color=layout.get('back_note_font_color') or DEFAULT_BACK_FONT_COLOR,
             mode=mode,
             personal_note_path=personal_note_path
         )

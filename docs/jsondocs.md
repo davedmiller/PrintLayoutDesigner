@@ -66,10 +66,23 @@ The `mode` field controls how all layouts are rendered.
 | `special` | string | No | Special rendering mode: `"double_col"` splits caption into two columns |
 | `gutter` | number | No | Width of gutter between columns for double_col mode (inches) |
 | `font_color` | string | No | Hex color code for caption text (default: black) |
-| `back_paper_style` | object | No | Back side paper styling (see Style Object). Falls back to front `paper_style` if null. |
-| `back_note_style` | object | No | Back side personal note area styling (see Style Object) |
-| `back_note_font_color` | string | No | Hex color code for personal note text (default: black) |
+| `back_paper_style` | object | No | Back side paper styling override (see Style Object). Default: white, no border. |
+| `back_note_style` | object | No | Back side note area styling override (see Style Object). Default: white with thin black border. |
+| `back_note_font_color` | string | No | Hex color code for personal note text. Default: black (#000000). |
 | `back_note_dims` | object | No | Personal note area dimensions (see Dimensions Object). Default: 6" x 9" |
+
+## Back Side Defaults
+
+Back sides use simple, ink-efficient defaults unless explicitly overridden:
+
+| Property | Default Value |
+|----------|---------------|
+| `back_paper_style` | `{"background": "#FFFFFF", "border": null}` (white, no border) |
+| `back_note_style` | `{"background": "#FFFFFF", "border": {"color": "#000000", "width": 0.0625}}` (white with thin black border) |
+| `back_note_font_color` | `"#000000"` (black) |
+| `back_note_dims` | `{"width": 6, "height": 9}` |
+
+To customize the back side, add any of the `back_*` fields to override specific defaults.
 
 ## Dimensions Object
 
@@ -141,11 +154,7 @@ Controls the background and border styling for paper, image, and caption areas.
       "special": null,
       "gutter": null,
       "font_color": null,
-      "notes": "Layout: Classic Museum\nPaper: 8-5x11\nOrientation: Landscape Img\nTop Margin: 2\"\nText Gap: 1\"",
-      "back_paper_style": {"background": "#FFFFFF", "border": {"color": "#CCCCCC", "width": 0.5}},
-      "back_note_style": {"background": "#FAFAFA", "border": null},
-      "back_note_font_color": "#333333",
-      "back_note_dims": {"width": 6, "height": 9}
+      "notes": "Layout: Classic Museum\nPaper: 8-5x11\nOrientation: Landscape Img\nTop Margin: 2\"\nText Gap: 1\""
     }
   ]
 }
@@ -158,9 +167,11 @@ This creates a layout in design mode with:
 - 6x4 inch landscape image with light blue (#E8EFF5) background, positioned 1.25" left, 2" top
 - 6x1.75 inch caption with default background, positioned 1.25" left, 7" top
 
-**Back side:**
-- Same paper styling as front (white with gray border)
-- 6x9 inch centered personal note area with light gray (#FAFAFA) background
-- Dark gray (#333333) text color for the note
+**Back side (using defaults):**
+- White paper with no border
+- 6x9 inch centered personal note area with thin black border
+- Black text
+
+To customize the back, add `back_*` fields as needed.
 
 To generate print-ready output instead, change `"mode": "design"` to `"mode": "print"`.
