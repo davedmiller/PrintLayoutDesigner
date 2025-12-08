@@ -7,7 +7,7 @@ import os
 import sys
 
 # --- CONFIGURATION ---
-VERSION = "1.0.0"
+VERSION = "2.0.0"
 
 # Blueprint drawing size (the canvas we're drawing on)
 BLUEPRINT_W = 18
@@ -311,195 +311,29 @@ def load_layouts(filename='layouts.json'):
         print(f"Error: Invalid JSON in '{filename}': {e}")
         sys.exit(1)
 
-def generate_v2_layouts():
-    """Generate new v2 layout definitions with absolute positioning."""
-    layouts = load_layouts()
-    v2_layouts = []
-
-    for layout in layouts:
-        paper_w, paper_h = layout['paper_size']
-        img_w, img_h = layout['img']
-        margins = layout['margins']
-
-        # Calculate img_pos from margins
-        if 'left' in margins:
-            img_left = margins['left']
-        elif 'right' in margins:
-            img_left = paper_w - margins['right'] - img_w
-        else:
-            img_left = (paper_w - img_w) / 2
-
-        if 'top' in margins:
-            img_top = margins['top']
-        elif 'center_v' in margins:
-            img_top = (paper_h - img_h) / 2
-        else:
-            img_top = (paper_h - img_h) / 2
-
-        # Create v2 layout
-        v2_layout = {
-            'file': layout['file'],
-            'title': layout['title'],
-            'paper_size': {'width': paper_w, 'height': paper_h},
-            'img_dims': {'width': img_w, 'height': img_h},
-            'img_pos': {'left': img_left, 'top': img_top},
-            'txt_dims': {'width': layout['txt_dims'][0], 'height': layout['txt_dims'][1]},
-            'txt_pos': layout['txt_pos'],
-            'border': {'type': 'white', 'width': 0.5},
-            'special': layout.get('special'),
-            'gutter': layout.get('gutter'),
-            'notes': layout['notes']
-        }
-        v2_layouts.append(v2_layout)
-
-    return v2_layouts
-
-def write_v2_layouts(filename='layouts_v2.json'):
-    """Write v2 layout definitions to a JSON file."""
-    layouts = generate_v2_layouts()
-    with open(filename, 'w') as f:
-        json.dump(layouts, f, indent=2)
-    print(f"Wrote {len(layouts)} layouts to {filename}")
-
-def load_v2_layouts(filename='layouts_v2.json'):
-    """Load v2 layout definitions from a JSON file."""
-    try:
-        with open(filename, 'r') as f:
-            return json.load(f)
-    except FileNotFoundError:
-        print(f"Error: Could not find '{filename}'")
-        return []
-    except json.JSONDecodeError as e:
-        print(f"Error: Invalid JSON in '{filename}': {e}")
-        return []
-
-def compare_v1_v2_layouts():
-    """Compare computed dimensions between v1 and v2 layouts."""
-    v1_layouts = load_layouts()
-    v2_layouts = load_v2_layouts()
-
-    if len(v1_layouts) != len(v2_layouts):
-        print(f"WARNING: Layout count mismatch: v1={len(v1_layouts)}, v2={len(v2_layouts)}")
-        return
-
-    print(f"Comparing {len(v1_layouts)} layouts...")
-    all_match = True
-
-    for i, (v1, v2) in enumerate(zip(v1_layouts, v2_layouts)):
-        mismatches = []
-
-        # Paper dimensions
-        v1_paper_w, v1_paper_h = v1['paper_size']
-        v2_paper_w, v2_paper_h = v2['paper_size']['width'], v2['paper_size']['height']
-        if v1_paper_w != v2_paper_w or v1_paper_h != v2_paper_h:
-            mismatches.append(f"paper_size: v1=({v1_paper_w}, {v1_paper_h}), v2=({v2_paper_w}, {v2_paper_h})")
-
-        # Image dimensions
-        v1_img_w, v1_img_h = v1['img']
-        v2_img_w, v2_img_h = v2['img_dims']['width'], v2['img_dims']['height']
-        if v1_img_w != v2_img_w or v1_img_h != v2_img_h:
-            mismatches.append(f"img_dims: v1=({v1_img_w}, {v1_img_h}), v2=({v2_img_w}, {v2_img_h})")
-
-        # Image position (compute v1 from margins)
-        margins = v1['margins']
-        if 'left' in margins:
-            v1_img_left = margins['left']
-        elif 'right' in margins:
-            v1_img_left = v1_paper_w - margins['right'] - v1_img_w
-        else:
-            v1_img_left = (v1_paper_w - v1_img_w) / 2
-
-        if 'top' in margins:
-            v1_img_top = margins['top']
-        elif 'center_v' in margins:
-            v1_img_top = (v1_paper_h - v1_img_h) / 2
-        else:
-            v1_img_top = (v1_paper_h - v1_img_h) / 2
-
-        v2_img_left, v2_img_top = v2['img_pos']['left'], v2['img_pos']['top']
-        if abs(v1_img_left - v2_img_left) > 0.001 or abs(v1_img_top - v2_img_top) > 0.001:
-            mismatches.append(f"img_pos: v1=({v1_img_left}, {v1_img_top}), v2=({v2_img_left}, {v2_img_top})")
-
-        # Text dimensions
-        v1_txt_w, v1_txt_h = v1['txt_dims']
-        v2_txt_w, v2_txt_h = v2['txt_dims']['width'], v2['txt_dims']['height']
-        if v1_txt_w != v2_txt_w or v1_txt_h != v2_txt_h:
-            mismatches.append(f"txt_dims: v1=({v1_txt_w}, {v1_txt_h}), v2=({v2_txt_w}, {v2_txt_h})")
-
-        # Text position
-        v1_txt_left, v1_txt_top = v1['txt_pos']['left'], v1['txt_pos']['top']
-        v2_txt_left, v2_txt_top = v2['txt_pos']['left'], v2['txt_pos']['top']
-        if v1_txt_left != v2_txt_left or v1_txt_top != v2_txt_top:
-            mismatches.append(f"txt_pos: v1=({v1_txt_left}, {v1_txt_top}), v2=({v2_txt_left}, {v2_txt_top})")
-
-        if mismatches:
-            all_match = False
-            print(f"\n{v1['file']}:")
-            for m in mismatches:
-                print(f"  MISMATCH: {m}")
-
-    if all_match:
-        print("All layouts match!")
-    else:
-        print("\nSome layouts have mismatches.")
-
 # Run Generator
 if __name__ == "__main__":
     print(f"PrintLayoutDesigner v{VERSION}")
-    # write_v2_layouts()
 
-    # Compare v1 and v2 layouts
-    compare_v1_v2_layouts()
-
-    # Generate from v1 layouts
     layouts = load_layouts()
-    print(f"Generating {len(layouts)} v1 Layout Blueprints...")
+    print(f"Generating {len(layouts)} Layout Blueprints...")
     for layout in layouts:
         draw_blueprint(
             filename=layout['file'],
             title=layout['title'],
             layout_type="Standard",
             orientation="Portrait",
-            paper_w=layout['paper_size'][0],
-            paper_h=layout['paper_size'][1],
-            black_border=layout.get('black_border', 0),
-            img_w=layout['img'][0],
-            img_h=layout['img'][1],
-            img_margins=layout['margins'],
-            txt_dims=layout['txt_dims'],
+            paper_w=layout['paper_size']['width'],
+            paper_h=layout['paper_size']['height'],
+            black_border=0,  # TODO: use layout['border'] field
+            img_w=layout['img_dims']['width'],
+            img_h=layout['img_dims']['height'],
+            img_margins={'left': layout['img_pos']['left'], 'top': layout['img_pos']['top']},
+            txt_dims=[layout['txt_dims']['width'], layout['txt_dims']['height']],
             txt_pos_desc=layout['txt_pos'],
             notes=layout['notes'],
             special_mode=layout.get('special'),
             gutter=layout.get('gutter')
         )
-
-    # Generate from v2 layouts
-    v2_layouts = load_v2_layouts()
-    if v2_layouts:
-        print(f"Generating {len(v2_layouts)} v2 Layout Blueprints...")
-        for layout in v2_layouts:
-            # Create v2 filename by inserting _v2 before extension
-            base_name = layout['file'].rsplit('.', 1)[0]
-            v2_filename = f"{base_name}_v2.png"
-
-            # Convert v2 format to draw_blueprint parameters
-            # img_pos with left/top works as img_margins since draw_blueprint checks for 'left' and 'top' keys
-            draw_blueprint(
-                filename=v2_filename,
-                title=layout['title'] + " (v2)",
-                layout_type="Standard",
-                orientation="Portrait",
-                paper_w=layout['paper_size']['width'],
-                paper_h=layout['paper_size']['height'],
-                black_border=0,  # v2 uses border field, handled separately later
-                img_w=layout['img_dims']['width'],
-                img_h=layout['img_dims']['height'],
-                img_margins={'left': layout['img_pos']['left'], 'top': layout['img_pos']['top']},
-                txt_dims=[layout['txt_dims']['width'], layout['txt_dims']['height']],
-                txt_pos_desc=layout['txt_pos'],
-                notes=layout['notes'],
-                special_mode=layout.get('special'),
-                gutter=layout.get('gutter')
-            )
 
     print("Done! Check your folder.")

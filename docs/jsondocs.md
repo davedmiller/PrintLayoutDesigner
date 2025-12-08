@@ -8,44 +8,51 @@ This file defines all print layout configurations. Each layout is a JSON object 
 |-------|------|----------|-------------|
 | `file` | string | Yes | Output filename (e.g., `"01_ClassicMuseum_Land_8-5x11.png"`) |
 | `title` | string | Yes | Layout name displayed in title block |
-| `paper_size` | [width, height] | Yes | Print paper dimensions in inches (e.g., `[8.5, 11]` or `[11, 14]`) |
-| `black_border` | number | Yes | Width of black border around paper edge in inches (0 = no border) |
-| `img` | [width, height] | Yes | Image dimensions in inches |
-| `margins` | object | Yes | Image positioning (see Margins below) |
-| `txt_dims` | [width, height] | Yes | Caption text box dimensions in inches |
-| `txt_pos` | object | Yes | Caption text positioning (see Text Position below) |
+| `paper_size` | object | Yes | Print paper dimensions (see Dimensions Object) |
+| `img_dims` | object | Yes | Image dimensions (see Dimensions Object) |
+| `img_pos` | object | Yes | Image position from paper edges (see Position Object) |
+| `txt_dims` | object | Yes | Caption text box dimensions (see Dimensions Object) |
+| `txt_pos` | object | Yes | Caption text position from paper edges (see Position Object) |
+| `border` | object | Yes | Border style and width (see Border Object) |
 | `notes` | string | Yes | Installation notes displayed in title block |
 | `special` | string | No | Special rendering mode: `"double_col"` splits caption into two columns |
 | `gutter` | number | No | Width of gutter between columns for double_col mode (inches) |
 
-## Margins Object
+## Dimensions Object
 
-Controls image placement on the paper.
-
-| Field | Type | Description |
-|-------|------|-------------|
-| `top` | number | Distance from top of paper to top of image (inches) |
-| `left` | number | Distance from left edge of paper to left of image |
-| `right` | number | Distance from right edge of paper to right of image |
-| `center_v` | boolean | If true, vertically center the image |
-
-- If neither `left` nor `right` is specified, image is horizontally centered
-- If neither `top` nor `center_v` is specified, image is vertically centered
-
-## Text Position Object
-
-Controls caption text box placement using absolute positioning from paper edges.
+Used for `paper_size`, `img_dims`, and `txt_dims`.
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `left` | number | Distance from left edge of paper to left edge of text box (inches) |
-| `top` | number | Distance from top edge of paper to top edge of text box (inches) |
+| `width` | number | Width in inches |
+| `height` | number | Height in inches |
+
+## Position Object
+
+Used for `img_pos` and `txt_pos`. Specifies absolute position from paper edges.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `left` | number | Distance from left edge of paper (inches) |
+| `top` | number | Distance from top edge of paper (inches) |
+
+## Border Object
+
+Controls the border drawn around the paper.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `type` | string | Border type: `"white"` (dashed inset line) or `"black"` (solid edge border) |
+| `width` | number | Border width/inset in inches |
+
+- `type: "white"` draws a dashed line inset from the paper edge by `width` inches
+- `type: "black"` draws a solid border at the paper edge with `width` thickness
 
 ## Special Modes
 
 | Mode | Description |
 |------|-------------|
-| `double_col` | Caption split into two columns with 0.5" gutter |
+| `double_col` | Caption split into two columns with gutter specified by `gutter` field |
 
 ## Example Layout
 
@@ -53,17 +60,19 @@ Controls caption text box placement using absolute positioning from paper edges.
 {
   "file": "01_ClassicMuseum_Land_8-5x11.png",
   "title": "Classic Museum - Landscape",
-  "paper_size": [8.5, 11],
-  "black_border": 0.25,
-  "img": [6, 4],
-  "margins": {"top": 2},
-  "txt_dims": [6, 1.75],
+  "paper_size": {"width": 8.5, "height": 11},
+  "img_dims": {"width": 6, "height": 4},
+  "img_pos": {"left": 1.25, "top": 2},
+  "txt_dims": {"width": 6, "height": 1.75},
   "txt_pos": {"left": 1.25, "top": 7.0},
+  "border": {"type": "white", "width": 0.5},
+  "special": null,
+  "gutter": null,
   "notes": "Layout: Classic Museum\nPaper: 8-5x11\nOrientation: Landscape Img\nTop Margin: 2\"\nText Gap: 1\""
 }
 ```
 
 This creates a layout with:
-- 8.5x11 inch paper with 1/4 inch black border
-- 6x4 inch landscape image, 2 inches from top, horizontally centered
-- 6x1.75 inch caption, 1.25 inches from left edge and 7 inches from top of paper
+- 8.5x11 inch paper with white border (dashed line 0.5 inches inset from edge)
+- 6x4 inch landscape image positioned 1.25 inches from left and 2 inches from top
+- 6x1.75 inch caption positioned 1.25 inches from left and 7 inches from top
