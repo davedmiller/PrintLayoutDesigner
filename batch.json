@@ -1,9 +1,9 @@
 {
   "mode": "design",
-  "image_path_landscape": "/Users/dave/Documents/ClaudeApps/PrintLayoutDesigner/docs/flower.tif",
-  "image_path_portrait": "/Users/dave/Documents/ClaudeApps/PrintLayoutDesigner/docs/dae.tif",
-  "text_path": "/Users/dave/Documents/ClaudeApps/PrintLayoutDesigner/docs/lorem ipsum.md",
-  "personal_note_path": "/Users/dave/Documents/ClaudeApps/PrintLayoutDesigner/docs/personal note.md",
+  "image_path_landscape": "/Users/dave/Documents/ClaudeApps/PrintLayoutDesigner/test/assets/flower.tif",
+  "image_path_portrait": "/Users/dave/Documents/ClaudeApps/PrintLayoutDesigner/test/assets/dae.tif",
+  "text_path": "/Users/dave/Documents/ClaudeApps/PrintLayoutDesigner/test/assets/lorem ipsum.md",
+  "personal_note_path": "/Users/dave/Documents/ClaudeApps/PrintLayoutDesigner/test/assets/personal note.md",
   "batch": [
     {
       "layout": "01_ClassicMuseum_Land_8-5x11",
