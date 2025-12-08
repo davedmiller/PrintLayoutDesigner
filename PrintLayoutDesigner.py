@@ -419,11 +419,11 @@ def draw_canvas(filename, title, layout_type, orientation,
                 color=BLUE, linewidth=1.5)
 
         # Title section (left side - 60%)
-        ax.text(title_block_x + 0.2, title_block_y + TITLE_BLOCK_H - 0.4, "LAYOUT",
-                fontsize=8, fontweight='bold', color=BLUE)
-        title_text = f"{title.upper()} - {theme_name.upper()} - FRONT" if theme_name else f"{title.upper()} - FRONT"
-        ax.text(title_block_x + 0.2, title_block_y + TITLE_BLOCK_H - 0.8, title_text,
+        ax.text(title_block_x + 0.2, title_block_y + TITLE_BLOCK_H - 0.4, f"{title.upper()} - FRONT",
                 fontsize=12, fontweight='bold', color=BLUE)
+        if theme_name:
+            ax.text(title_block_x + 0.2, title_block_y + TITLE_BLOCK_H - 0.8, theme_name.upper(),
+                    fontsize=12, fontweight='bold', color=BLUE)
         ax.text(title_block_x + 0.2, title_block_y + 1.2, f"Paper Size: {paper_w}\" × {paper_h}\"",
                 fontsize=8, color='#333333')
 
@@ -615,11 +615,11 @@ def draw_back(filename, title, paper_w, paper_h, paper_style, note_style,
                 color=BLUE, linewidth=1.5)
 
         # Title section (left side - 60%)
-        ax.text(title_block_x + 0.2, title_block_y + TITLE_BLOCK_H - 0.4, "LAYOUT",
-                fontsize=8, fontweight='bold', color=BLUE)
-        title_text = f"{title.upper()} - {theme_name.upper()} - BACK" if theme_name else f"{title.upper()} - BACK"
-        ax.text(title_block_x + 0.2, title_block_y + TITLE_BLOCK_H - 0.8, title_text,
+        ax.text(title_block_x + 0.2, title_block_y + TITLE_BLOCK_H - 0.4, f"{title.upper()} - BACK",
                 fontsize=12, fontweight='bold', color=BLUE)
+        if theme_name:
+            ax.text(title_block_x + 0.2, title_block_y + TITLE_BLOCK_H - 0.8, theme_name.upper(),
+                    fontsize=12, fontweight='bold', color=BLUE)
         ax.text(title_block_x + 0.2, title_block_y + 1.2, f"Paper Size: {paper_w}\" × {paper_h}\"",
                 fontsize=8, color='#333333')
 
