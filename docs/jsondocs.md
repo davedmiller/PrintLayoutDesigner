@@ -34,6 +34,7 @@ Controls which layouts to generate and with which themes.
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `mode` | string | No | Rendering mode: `"design"` or `"print"` (default: `"design"`) |
+| `show_blueprints` | boolean | No | Generate PNG blueprints and include in HTML (default: `true`) |
 | `image_path_landscape` | string | No | Path to sample image for landscape layouts (img_w > img_h) |
 | `image_path_portrait` | string | No | Path to sample image for portrait layouts (img_h >= img_w) |
 | `text_path` | string | No | Path to sample text file for captions |

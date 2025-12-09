@@ -1,0 +1,42 @@
+{
+  "name": "T02_Align_Center_Middle",
+  "title": "Alignment Test - Center/Middle",
+  "paper_size": {
+    "width": 8.5,
+    "height": 11
+  },
+  "front": {
+    "img_dims": {"width": 6, "height": 4},
+    "img_pos": {"left": 1.25, "top": 1.5},
+    "caption_dims": {"width": 6, "height": 2.5},
+    "caption_pos": {"left": 1.25, "top": 6.5},
+    "special": null,
+    "gutter": null,
+    "border_widths": {
+      "paper": 0.5,
+      "img": 0.125,
+      "caption": 0.0625
+    },
+    "text_style": {
+      "align_h": "center",
+      "align_v": "middle",
+      "font": "Helvetica, Arial, sans-serif",
+      "size": 12
+    }
+  },
+  "back": {
+    "note_dims": {"width": 6, "height": 8},
+    "note_pos": "centered",
+    "border_widths": {
+      "paper": 0.5,
+      "note": 0.0625
+    },
+    "text_style": {
+      "align_h": "center",
+      "align_v": "middle",
+      "font": "Helvetica, Arial, sans-serif",
+      "size": 12
+    }
+  },
+  "notes": "TEST: align_h=center, align_v=middle\nFont: Helvetica 12pt"
+}

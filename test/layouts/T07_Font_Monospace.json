@@ -1,0 +1,42 @@
+{
+  "name": "T07_Font_Monospace",
+  "title": "Font Test - Monospace",
+  "paper_size": {
+    "width": 8.5,
+    "height": 11
+  },
+  "front": {
+    "img_dims": {"width": 6, "height": 4},
+    "img_pos": {"left": 1.25, "top": 1.5},
+    "caption_dims": {"width": 6, "height": 2.5},
+    "caption_pos": {"left": 1.25, "top": 6.5},
+    "special": null,
+    "gutter": null,
+    "border_widths": {
+      "paper": 0.5,
+      "img": 0.125,
+      "caption": 0.0625
+    },
+    "text_style": {
+      "align_h": "left",
+      "align_v": "top",
+      "font": "Courier New, monospace",
+      "size": 9
+    }
+  },
+  "back": {
+    "note_dims": {"width": 6, "height": 8},
+    "note_pos": "centered",
+    "border_widths": {
+      "paper": 0.5,
+      "note": 0.0625
+    },
+    "text_style": {
+      "align_h": "left",
+      "align_v": "top",
+      "font": "Courier New, monospace",
+      "size": 9
+    }
+  },
+  "notes": "TEST: Monospace font\nFont: Courier New 9pt"
+}

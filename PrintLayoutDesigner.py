@@ -14,10 +14,12 @@ import textwrap
 import webbrowser
 
 # --- CONFIGURATION ---
-VERSION = "4.0.0"
+VERSION = "4.1.0"
 
-# Canvas drawing size
-CANVAS_W = 18
+# Canvas drawing size (combined blueprint: front + back side-by-side)
+PANEL_W = 18      # Width of each panel (front or back)
+PANEL_GAP = 0     # Gap between panels
+CANVAS_W = PANEL_W * 2 + PANEL_GAP  # 36 inches total
 CANVAS_H = 24
 
 # Print paper size (the actual paper being designed for printing)
@@ -181,7 +183,7 @@ def generate_box_css(x, y, w, h, style, paper_h):
 
 def generate_html_output(batch_entry, layout, front_theme, back_theme,
                          image_path, text_content, note_content,
-                         layout_name, output_dir, front_png=None, back_png=None):
+                         layout_name, output_dir, blueprint_png=None):
     """Generate HTML file for print mode output."""
 
     paper_w = layout['paper_size']['width']
@@ -228,6 +230,22 @@ def generate_html_output(batch_entry, layout, front_theme, back_theme,
     front_paper_bg = paper_style.get('background', '#FFFFFF') if paper_style else '#FFFFFF'
     back_paper_bg = back_paper_style.get('background', '#FFFFFF') if back_paper_style else '#FFFFFF'
 
+    # Paper border (inset) - rendered as box-shadow inset
+    front_paper_border = paper_style.get('border') if paper_style else None
+    back_paper_border = back_paper_style.get('border') if back_paper_style else None
+
+    def get_paper_border_css(border):
+        if border and border.get('width') and border.get('color'):
+            w = border['width']
+            c = border['color']
+            # Inset box-shadow simulates border drawn inside the paper
+            # Include both the inset border AND the drop shadow for screen display
+            return f"box-shadow: inset 0 0 0 {w}in {c}, 0 0 10px rgba(0,0,0,0.3);"
+        return ""
+
+    front_border_css = get_paper_border_css(front_paper_border)
+    back_border_css = get_paper_border_css(back_paper_border)
+
     img_css = generate_box_css(img_left, img_y, img_w, img_h, img_style, paper_h)
     caption_css = generate_box_css(caption_left, caption_y, caption_w, caption_h, caption_style, paper_h)
     note_css = generate_box_css(note_left, note_y, note_w, note_h, back_note_style, paper_h)
@@ -237,18 +255,10 @@ def generate_html_output(batch_entry, layout, front_theme, back_theme,
     gutter = front.get('gutter', 0.25)
 
     if special_mode == 'double_col':
-        col_w = (caption_w - gutter) / 2
-        col1_left = caption_left
-        col2_left = caption_left + col_w + gutter
-        col1_css = generate_box_css(col1_left, caption_y, col_w, caption_h, caption_style, paper_h)
-        col2_css = generate_box_css(col2_left, caption_y, col_w, caption_h, caption_style, paper_h)
+        caption_border = caption_style.get('border', {}) if caption_style else {}
+        rule_color = caption_border.get('color', '#000000')
         caption_block_html = f'''
-            <div class="caption-col" style="{col1_css} display: flex; flex-direction: column; align-items: {front_css['align_items']}; overflow: hidden; padding: 0.1in;">
-                <div style="text-align: {front_css['text_align']}; font-family: {front_css['font_family']}; font-size: {front_css['font_size']}pt; color: {font_color or '#000000'};">{caption_html}</div>
-            </div>
-            <div class="caption-col" style="{col2_css} display: flex; flex-direction: column; align-items: {front_css['align_items']}; overflow: hidden; padding: 0.1in;">
-                <div style="text-align: {front_css['text_align']}; font-family: {front_css['font_family']}; font-size: {front_css['font_size']}pt; color: {font_color or '#000000'};"></div>
-            </div>'''
+            <div class="caption-box" style="{caption_css} overflow: hidden; padding: 0.1in; column-count: 2; column-gap: {gutter}in; column-fill: auto; column-rule: 1px solid {rule_color}; text-align: {front_css['text_align']}; font-family: {front_css['font_family']}; font-size: {front_css['font_size']}pt; color: {font_color or '#000000'};">{caption_html}</div>'''
     else:
         caption_block_html = f'''
             <div class="caption-box" style="{caption_css} display: flex; flex-direction: column; justify-content: {front_css['align_items']}; overflow: hidden; padding: 0.1in;">
@@ -283,13 +293,25 @@ def generate_html_output(batch_entry, layout, front_theme, back_theme,
             width: {paper_w}in;
             height: {paper_h}in;
             position: relative;
-            margin: 0 auto;
             overflow: hidden;
+        }}
+        .pages-container {{
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            padding: 20px;
         }}
         @media screen {{
             .page {{
-                margin: 20px auto;
                 box-shadow: 0 0 10px rgba(0,0,0,0.3);
+                flex-shrink: 0;
+            }}
+        }}
+        @media print {{
+            .pages-container {{
+                display: block;
+                padding: 0;
             }}
         }}
         .image-box img {{
@@ -326,26 +348,25 @@ def generate_html_output(batch_entry, layout, front_theme, back_theme,
     </style>
 </head>
 <body>
-    <!-- Front Page -->
-    <div class="page" style="background: {front_paper_bg};">
-        <div class="image-box" style="{img_css} overflow: hidden;">
-            <img src="{image_path}" alt="Image">
+    <div class="pages-container">
+        <!-- Front Page -->
+        <div class="page" style="width: {paper_w}in; height: {paper_h}in; background: {front_paper_bg}; {front_border_css}">
+            <div class="image-box" style="{img_css} overflow: hidden;">
+                <img src="{image_path}" alt="Image">
+            </div>
+            {caption_block_html}
         </div>
-        {caption_block_html}
+
+        <!-- Back Page -->
+        <div class="page" style="width: {paper_w}in; height: {paper_h}in; background: {back_paper_bg}; {back_border_css}">
+            <div class="note-box" style="{note_css} display: flex; flex-direction: column; justify-content: {back_css['align_items']}; overflow: hidden; padding: 0.1in;">
+                <div style="text-align: {back_css['text_align']}; font-family: {back_css['font_family']}; font-size: {back_css['font_size']}pt; color: {back_font_color or '#000000'};">{note_html}</div>
+            </div>
+        </div>
     </div>
 
-    <!-- Front Blueprint -->
-    {f'<div class="blueprint"><h3>Front Blueprint</h3><img src="{front_png}" alt="Front Blueprint"></div>' if front_png else ''}
-
-    <!-- Back Page -->
-    <div class="page" style="background: {back_paper_bg};">
-        <div class="note-box" style="{note_css} display: flex; flex-direction: column; justify-content: {back_css['align_items']}; overflow: hidden; padding: 0.1in;">
-            <div style="text-align: {back_css['text_align']}; font-family: {back_css['font_family']}; font-size: {back_css['font_size']}pt; color: {back_font_color or '#000000'};">{note_html}</div>
-        </div>
-    </div>
-
-    <!-- Back Blueprint -->
-    {f'<div class="blueprint"><h3>Back Blueprint</h3><img src="{back_png}" alt="Back Blueprint"></div>' if back_png else ''}
+    <!-- Blueprint -->
+    {f'<div class="blueprint"><h3>Blueprint</h3><img src="{blueprint_png}" alt="Blueprint"></div>' if blueprint_png else ''}
 </body>
 </html>
 '''
@@ -365,7 +386,7 @@ def generate_html_output(batch_entry, layout, front_theme, back_theme,
 def load_batch(batch_path):
     """Load batch configuration from JSON file.
 
-    Returns (batch_entries, mode, image_path_landscape, image_path_portrait, text_path, personal_note_path).
+    Returns (batch_entries, mode, image_path_landscape, image_path_portrait, text_path, personal_note_path, show_blueprints).
     """
     try:
         with open(batch_path, 'r') as f:
@@ -380,7 +401,8 @@ def load_batch(batch_path):
         data.get('image_path_landscape'),
         data.get('image_path_portrait'),
         data.get('text_path'),
-        data.get('personal_note_path')
+        data.get('personal_note_path'),
+        data.get('show_blueprints', True)
     )
 
 
@@ -510,7 +532,7 @@ def draw_dim_line(ax, x, y_start, y_end, label, dim_id=None):
         label_text = f"{dim_id}: {label}"
     else:
         label_text = label
-    ax.text(x - 0.1, mid_y, label_text, ha='right', va='center', fontsize=7, color=BLUE, rotation=90)
+    ax.text(x - 0.1, mid_y, label_text, ha='right', va='center', fontsize=12, color=BLUE, rotation=90)
 
 def draw_horizontal_dim_line(ax, y, x_start, x_end, label, dim_id=None, offset=0):
     """Draws a horizontal dimension line with arrows and optional ID"""
@@ -521,575 +543,459 @@ def draw_horizontal_dim_line(ax, y, x_start, x_end, label, dim_id=None, offset=0
         label_text = f"{dim_id}: {label}"
     else:
         label_text = label
-    ax.text(mid_x, y + 0.1 + offset, label_text, ha='center', va='bottom', fontsize=7, color=BLUE)
+    ax.text(mid_x, y + 0.1 + offset, label_text, ha='center', va='bottom', fontsize=12, color=BLUE)
 
-def draw_canvas(filename, title, layout_type, orientation,
-                   paper_w, paper_h, paper_style, img_style, caption_style,
-                   img_w, img_h, img_margins,
-                   caption_dims, caption_pos,
-                   notes, special_mode=None, gutter=None, mode="design",
-                   image_path_landscape=None, image_path_portrait=None, text_path=None,
-                   font_color=None, theme_name=None, output_dir='output'):
-    """
-    Generates a single canvas image.
-    paper_w, paper_h = dimensions of the print paper (e.g., 8.5x11 or 11x14)
-    paper_style = {'background': hex, 'border': {'color': hex, 'width': val}}
-    img_style = {'background': hex, 'border': {'color': hex, 'width': val}}
-    caption_style = {'background': hex, 'border': {'color': hex, 'width': val}}
-    img_margins = {'top': val, 'left': val, 'right': val}
-    mode = 'design' (full canvas with dimensions) or 'print' (paper-sized, no annotations)
-    image_path_landscape = path to sample image for landscape layouts (img_w > img_h)
-    image_path_portrait = path to sample image for portrait layouts (img_h >= img_w)
-    text_path = path to sample text file (design mode only, renders instead of label)
-    (We calculate X/Y based on margins or centering logic)
-    """
-    # Setup canvas and paper
-    fig, ax, paper_x, paper_y, title_block_top = setup_canvas(paper_w, paper_h, paper_style, mode)
-    draw_paper(ax, paper_x, paper_y, paper_w, paper_h, paper_style, mode)
 
-    # --- CALCULATE IMAGE POSITION (relative to paper, not canvas) ---
-    # Default: Center Horizontal if 'left'/'right' not specified in margins
-    if 'left' in img_margins:
-        img_x = paper_x + img_margins['left']
-    elif 'right' in img_margins:
-        img_x = paper_x + paper_w - img_margins['right'] - img_w
+def draw_combined_blueprint(filename, layout, front_theme, back_theme,
+                            image_path_landscape, image_path_portrait,
+                            text_path, personal_note_path, output_dir):
+    """Generate combined front+back blueprint as single PNG."""
+
+    # Extract layout info
+    title = layout.get('title', 'Layout')
+    paper_w = layout['paper_size']['width']
+    paper_h = layout['paper_size']['height']
+    front = layout.get('front', {})
+    back = layout.get('back', {})
+    notes = layout.get('notes', '')
+
+    # Build styles
+    paper_style, img_style, caption_style, font_color = build_front_styles(layout, front_theme)
+    back_paper_style, back_note_style, back_font_color = build_back_styles(layout, back_theme)
+
+    # Create combined canvas
+    fig, ax = plt.subplots(figsize=(CANVAS_W, CANVAS_H), dpi=DPI)
+    ax.set_xlim(-1, CANVAS_W - 1)
+    ax.set_ylim(-1, CANVAS_H - 1)
+    fig.patch.set_facecolor(CANVAS_COLOR)
+    ax.set_facecolor(CANVAS_COLOR)
+
+    # Draw canvas border
+    canvas_border = patches.Rectangle((-1 + BORDER_MARGIN, -1 + BORDER_MARGIN),
+                                       CANVAS_W - 2*BORDER_MARGIN,
+                                       CANVAS_H - 2*BORDER_MARGIN,
+                                       linewidth=1, edgecolor=BLUE, facecolor='none')
+    ax.add_patch(canvas_border)
+
+    # Title block dimensions
+    title_block_y = -1 + BORDER_MARGIN
+    title_block_top = title_block_y + TITLE_BLOCK_H
+    available_height = (CANVAS_H - 1) - title_block_top
+
+    # Calculate panel centers and paper positions
+    # Left panel: center at PANEL_W/2 - 1 = 8
+    # Right panel: center at PANEL_W + PANEL_GAP + PANEL_W/2 - 1 = 28
+    left_center = PANEL_W / 2 - 1
+    right_center = PANEL_W + PANEL_GAP + PANEL_W / 2 - 1
+
+    front_paper_x = left_center - paper_w / 2
+    back_paper_x = right_center - paper_w / 2
+    paper_y = title_block_top + (available_height - paper_h) / 2
+
+    # ===== DRAW FRONT PANEL (LEFT) =====
+    paper_bg = paper_style.get('background', '#FFFFFF') if paper_style else '#FFFFFF'
+    paper_border = paper_style.get('border') if paper_style else None
+
+    # Draw front paper
+    if paper_border:
+        draw_border_inset(ax, front_paper_x, paper_y, paper_w, paper_h, paper_border, paper_bg)
+        paper_edge = patches.Rectangle((front_paper_x, paper_y), paper_w, paper_h,
+                                        linewidth=0.8, edgecolor=BLUE, facecolor='none')
+        ax.add_patch(paper_edge)
     else:
-        img_x = paper_x + (paper_w - img_w) / 2
+        paper_rect = patches.Rectangle((front_paper_x, paper_y), paper_w, paper_h,
+                                        linewidth=0.8, edgecolor=BLUE, facecolor=paper_bg)
+        ax.add_patch(paper_rect)
 
-    # Calculate Y based on Top Margin or Vertical Centering
-    if 'top' in img_margins:
-        img_y = paper_y + paper_h - img_margins['top'] - img_h
-    elif 'center_v' in img_margins:
-        img_y = paper_y + (paper_h - img_h) / 2
-    else:
-        img_y = paper_y + (paper_h - img_h) / 2 # Default fallback
+    # Front image position
+    img_w = front['img_dims']['width']
+    img_h = front['img_dims']['height']
+    img_left = front['img_pos']['left']
+    img_top_margin = front['img_pos']['top']
+    img_x = front_paper_x + img_left
+    img_y = paper_y + paper_h - img_top_margin - img_h
 
-    # Draw Image with style using draw_content_block
-    def render_image():
-        if mode == "design":
-            image_path = image_path_landscape if img_w > img_h else image_path_portrait
-            if image_path and os.path.exists(image_path):
-                try:
-                    sample_img = mpimg.imread(image_path)
-                    ax.imshow(sample_img, extent=[img_x, img_x + img_w, img_y, img_y + img_h],
-                             aspect='auto', zorder=2)
-                except Exception:
-                    ax.text(img_x + img_w/2, img_y + img_h/2, f"IMAGE\n{img_w}\" x {img_h}\"",
-                            ha='center', va='center', color='#666666', fontsize=10, fontweight='bold')
-            else:
+    # Draw front image
+    image_path = image_path_landscape if img_w > img_h else image_path_portrait
+    def render_front_image():
+        if image_path and os.path.exists(image_path):
+            try:
+                sample_img = mpimg.imread(image_path)
+                ax.imshow(sample_img, extent=[img_x, img_x + img_w, img_y, img_y + img_h],
+                         aspect='auto', zorder=2)
+            except Exception:
                 ax.text(img_x + img_w/2, img_y + img_h/2, f"IMAGE\n{img_w}\" x {img_h}\"",
-                        ha='center', va='center', color='#666666', fontsize=10, fontweight='bold')
+                        ha='center', va='center', color='#666666', fontsize=15, fontweight='bold')
+        else:
+            ax.text(img_x + img_w/2, img_y + img_h/2, f"IMAGE\n{img_w}\" x {img_h}\"",
+                    ha='center', va='center', color='#666666', fontsize=15, fontweight='bold')
+    draw_content_block(ax, img_x, img_y, img_w, img_h, img_style, render_front_image)
 
-    draw_content_block(ax, img_x, img_y, img_w, img_h, img_style, render_image)
+    # Front caption position
+    caption_w = front['caption_dims']['width']
+    caption_h = front['caption_dims']['height']
+    caption_x = front_paper_x + front['caption_pos']['left']
+    caption_y = paper_y + paper_h - front['caption_pos']['top'] - caption_h
 
-    # --- CALCULATE CAPTION POSITION (relative to paper) ---
-    caption_w, caption_h = caption_dims
-
-    # Caption position from absolute left/top margins
-    caption_x = paper_x + caption_pos['left']
-    caption_y = paper_y + paper_h - caption_pos['top'] - caption_h
-
-    # Load sample text if path provided
+    # Load sample text
     sample_text = None
     if text_path and os.path.exists(text_path):
         try:
             with open(text_path, 'r') as f:
                 sample_text = f.read().strip()
         except Exception:
-            sample_text = None
+            pass
 
-    # Text color for sample text (default to black)
     text_color = font_color if font_color else '#000000'
+    special_mode = front.get('special')
+    gutter = front.get('gutter', 0.25)
 
-    # Draw Caption Block(s) with style using draw_content_block
+    # Draw front caption
     if special_mode == 'double_col':
         col_w = (caption_w - gutter) / 2
         col1_x = caption_x
         col2_x = caption_x + col_w + gutter
+        rule_x = caption_x + col_w + gutter / 2  # Center of gutter
 
-        # Prepare text for columns
+        # Get border color for column rule
+        caption_border = caption_style.get('border', {}) if caption_style else {}
+        rule_color = caption_border.get('color', '#000000')
+
         col1_text, col2_text = '', ''
-        if mode == "design" and sample_text:
-            chars_per_col = int(col_w * 12)
+        if sample_text:
+            chars_per_col = int(col_w * 7)
             wrapped = textwrap.fill(sample_text, width=chars_per_col)
             lines = wrapped.split('\n')
             mid = len(lines) // 2
             col1_text = '\n'.join(lines[:mid]) if mid > 0 else lines[0] if lines else ''
             col2_text = '\n'.join(lines[mid:]) if mid < len(lines) else ''
 
-        def render_col1():
-            if mode == "design":
-                if sample_text:
-                    ax.text(col1_x + 0.1, caption_y + caption_h - 0.1, col1_text,
-                            ha='left', va='top', color=text_color, fontsize=7, wrap=True)
-                else:
-                    ax.text(col1_x + col_w/2, caption_y + caption_h/2, "CAPTION",
-                            ha='center', va='center', color='#666666', fontsize=8, alpha=0.5)
+        def render_double_col():
+            # Draw column rule (vertical line in center of gutter)
+            ax.plot([rule_x, rule_x], [caption_y, caption_y + caption_h],
+                    color=rule_color, linewidth=0.5, zorder=5)
+            if sample_text:
+                ax.text(col1_x + 0.1, caption_y + caption_h - 0.1, col1_text,
+                        ha='left', va='top', color=text_color, fontsize=12, wrap=True)
+                ax.text(col2_x + 0.1, caption_y + caption_h - 0.1, col2_text,
+                        ha='left', va='top', color=text_color, fontsize=12, wrap=True)
+            else:
+                ax.text(caption_x + caption_w/2, caption_y + caption_h/2, "CAPTION",
+                        ha='center', va='center', color='#666666', fontsize=13, alpha=0.5)
 
-        def render_col2():
-            if mode == "design":
-                if sample_text:
-                    ax.text(col2_x + 0.1, caption_y + caption_h - 0.1, col2_text,
-                            ha='left', va='top', color=text_color, fontsize=7, wrap=True)
-                else:
-                    ax.text(col2_x + col_w/2, caption_y + caption_h/2, "CAPTION",
-                            ha='center', va='center', color='#666666', fontsize=8, alpha=0.5)
-
-        draw_content_block(ax, col1_x, caption_y, col_w, caption_h, caption_style, render_col1)
-        draw_content_block(ax, col2_x, caption_y, col_w, caption_h, caption_style, render_col2)
+        draw_content_block(ax, caption_x, caption_y, caption_w, caption_h, caption_style, render_double_col)
     else:
         def render_caption():
-            if mode == "design":
-                if sample_text:
-                    chars_per_line = int(caption_w * 12)
-                    wrapped = textwrap.fill(sample_text, width=chars_per_line)
-                    ax.text(caption_x + 0.1, caption_y + caption_h - 0.1, wrapped,
-                            ha='left', va='top', color=text_color, fontsize=7)
-                else:
-                    ax.text(caption_x + caption_w/2, caption_y + caption_h/2, "CAPTION TEXT\n(Greeked)",
-                            ha='center', va='center', color='#666666', fontsize=8, alpha=0.6, style='italic')
-
+            if sample_text:
+                chars_per_line = int(caption_w * 7)
+                wrapped = textwrap.fill(sample_text, width=chars_per_line)
+                ax.text(caption_x + 0.1, caption_y + caption_h - 0.1, wrapped,
+                        ha='left', va='top', color=text_color, fontsize=12)
+            else:
+                ax.text(caption_x + caption_w/2, caption_y + caption_h/2, "CAPTION TEXT\n(Greeked)",
+                        ha='center', va='center', color='#666666', fontsize=13, alpha=0.6, style='italic')
         draw_content_block(ax, caption_x, caption_y, caption_w, caption_h, caption_style, render_caption)
 
-    # --- TITLE BLOCK (Bottom of Canvas) - Design mode only ---
-    if mode == "design":
-        title_block_y = title_block_top - TITLE_BLOCK_H
-        title_block_x = -1 + BORDER_MARGIN
-        title_block_w = (CANVAS_W - 1 - BORDER_MARGIN) - (-1 + BORDER_MARGIN)
+    # Front dimensions
+    caption_top = caption_y + caption_h
+    if 'top' in front['img_pos']:
+        d1_x = front_paper_x - 1.0
+        draw_dim_line(ax, d1_x, paper_y + paper_h, img_y + img_h, f"{img_top_margin}\"", dim_id="D1")
+    draw_dim_line(ax, front_paper_x - 1.0, img_y, img_y + img_h, f"{img_h:.2f}\"", dim_id="D13")
+    img_bottom_margin = img_y - paper_y
+    if img_bottom_margin > 0.1:
+        draw_dim_line(ax, front_paper_x - 1.0, paper_y, img_y, f"{img_bottom_margin:.2f}\"", dim_id="D14")
+    gap_distance = img_y - caption_top
+    if gap_distance > 0.1:
+        draw_dim_line(ax, front_paper_x - 0.5, img_y, caption_top, f"{gap_distance:.2f}\"", dim_id="D5")
+    draw_dim_line(ax, front_paper_x + paper_w + 0.5, paper_y + paper_h, caption_top,
+                  f"{(paper_y + paper_h) - caption_top:.2f}\"", dim_id="D4")
+    if caption_h > 0.1:
+        draw_dim_line(ax, front_paper_x + paper_w + 0.5, caption_y, caption_top, f"{caption_h:.2f}\"", dim_id="D6")
+    bottom_margin = caption_y - paper_y
+    if bottom_margin > 0.1:
+        draw_dim_line(ax, front_paper_x + paper_w + 0.5, paper_y, caption_y, f"{bottom_margin:.2f}\"", dim_id="D12")
+    left_margin = img_x - front_paper_x
+    draw_horizontal_dim_line(ax, paper_y + paper_h + 0.5, front_paper_x, img_x, f"{left_margin:.2f}\"", dim_id="D2")
+    draw_horizontal_dim_line(ax, paper_y + paper_h + 0.5, img_x, img_x + img_w, f"{img_w:.2f}\"", dim_id="D16")
+    right_margin = (front_paper_x + paper_w) - (img_x + img_w)
+    draw_horizontal_dim_line(ax, paper_y + paper_h + 0.5, img_x + img_w, front_paper_x + paper_w, f"{right_margin:.2f}\"", dim_id="D3")
+    draw_horizontal_dim_line(ax, paper_y - 0.5, front_paper_x, caption_x, f"{caption_x - front_paper_x:.2f}\"", dim_id="D9")
+    draw_horizontal_dim_line(ax, paper_y - 0.5, caption_x, caption_x + caption_w, f"{caption_w:.2f}\"", dim_id="D10")
+    caption_right_margin = (front_paper_x + paper_w) - (caption_x + caption_w)
+    if caption_right_margin > 0.1:
+        draw_horizontal_dim_line(ax, paper_y - 0.5, caption_x + caption_w, front_paper_x + paper_w, f"{caption_right_margin:.2f}\"", dim_id="D15")
+    draw_horizontal_dim_line(ax, paper_y - 1.0, front_paper_x, front_paper_x + paper_w, f"{paper_w}\"", dim_id="D7")
+    draw_dim_line(ax, front_paper_x + paper_w + 1.0, paper_y, paper_y + paper_h, f"{paper_h}\"", dim_id="D8")
 
-        # Draw title block border
-        title_block_border = patches.Rectangle((title_block_x, title_block_y), title_block_w, TITLE_BLOCK_H,
-                                               linewidth=2, edgecolor=BLUE, facecolor='white')
-        ax.add_patch(title_block_border)
+    # ===== DRAW BACK PANEL (RIGHT) =====
+    back_paper_bg = back_paper_style.get('background', '#FFFFFF') if back_paper_style else '#FFFFFF'
+    back_paper_border = back_paper_style.get('border') if back_paper_style else None
 
-        # Divide title block into two sections: title (left) and notes (right)
-        divider_x = title_block_x + title_block_w * 0.6
-        ax.plot([divider_x, divider_x], [title_block_y, title_block_y + TITLE_BLOCK_H],
-                color=BLUE, linewidth=1.5)
-
-        # Title section (left side - 60%)
-        ax.text(title_block_x + 0.2, title_block_y + TITLE_BLOCK_H - 0.4, f"{title.upper()} - FRONT",
-                fontsize=12, fontweight='bold', color=BLUE)
-        if theme_name:
-            ax.text(title_block_x + 0.2, title_block_y + TITLE_BLOCK_H - 0.8, theme_name.upper(),
-                    fontsize=12, fontweight='bold', color=BLUE)
-        ax.text(title_block_x + 0.2, title_block_y + 1.2, f"Paper Size: {paper_w}\" × {paper_h}\"",
-                fontsize=8, color='#333333')
-
-        # Style information
-        font_color_display = font_color if font_color else "black"
-        style_info = (
-            f"{format_style_for_display(paper_style, 'paper')}\n"
-            f"{format_style_for_display(img_style, 'img')}\n"
-            f"{format_style_for_display(caption_style, 'caption')}, font={font_color_display}"
-        )
-        ax.text(title_block_x + 0.2, title_block_y + 0.9, style_info,
-                fontsize=6, va='top', color='#333333', family='monospace')
-
-        # Notes section (right side - 40%)
-        ax.text(divider_x + 0.2, title_block_y + TITLE_BLOCK_H - 0.4, "INSTALLATION DATA",
-                fontsize=8, fontweight='bold', color=BLUE)
-        ax.text(divider_x + 0.2, title_block_y + TITLE_BLOCK_H - 0.7, notes,
-                fontsize=7, va='top', color='#333333', wrap=True)
-
-    # --- DIMENSIONS (Visual Aids) - Design mode only ---
-    if mode == "design":
-        # All dimension lines are positioned outside the paper
-        # Calculate caption boundaries
-        caption_top = caption_y + caption_h
-        caption_bottom = caption_y
-        caption_left = caption_x
-        caption_right = caption_x + caption_w
-
-        # D1: Top Margin Dimension (from top of paper to top of image)
-        # Position: 1 inch left of paper edge
-        if 'top' in img_margins:
-            d1_x = paper_x - 1.0
-            draw_dim_line(ax, d1_x, paper_y + paper_h, img_y + img_h, f"{img_margins['top']}\"", dim_id="D1")
-
-        # D13: Image height
-        # Position: 1 inch left of paper edge (same line as D1)
-        d13_x = paper_x - 1.0
-        draw_dim_line(ax, d13_x, img_y, img_y + img_h, f"{img_h:.2f}\"", dim_id="D13")
-
-        # D14: Bottom of image to bottom of paper
-        # Position: 1 inch left of paper edge (same line as D1, D13)
-        img_bottom_margin = img_y - paper_y
-        if img_bottom_margin > 0.1:  # Only show if there's a meaningful margin
-            d14_x = paper_x - 1.0
-            draw_dim_line(ax, d14_x, paper_y, img_y, f"{img_bottom_margin:.2f}\"", dim_id="D14")
-
-        # D5: Dimension between bottom of image and top of caption (gap)
-        # Position: 1/2 inch left of paper edge (same line as D1)
-        gap_distance = img_y - caption_top
-        if gap_distance > 0.1:  # Only show if there's a meaningful gap
-            d5_x = paper_x - 0.5
-            draw_dim_line(ax, d5_x, img_y, caption_top, f"{gap_distance:.2f}\"", dim_id="D5")
-
-        # D4: Dimension from top of paper to top of caption
-        # Position: 0.5 inch right of paper edge
-        distance_sheet_to_caption = (paper_y + paper_h) - caption_top
-        d4_x = paper_x + paper_w + 0.5
-        draw_dim_line(ax, d4_x, paper_y + paper_h, caption_top, f"{distance_sheet_to_caption:.2f}\"", dim_id="D4")
-
-        # D6: Caption block height (vertical dimension of caption area)
-        # Position: 0.5 inch right of paper edge (same line as D4)
-        if caption_h > 0.1:  # Only show if there's a meaningful caption height
-            d6_x = paper_x + paper_w + 0.5
-            draw_dim_line(ax, d6_x, caption_bottom, caption_top, f"{caption_h:.2f}\"", dim_id="D6")
-
-        # D12: Bottom margin (from bottom of caption block to bottom of paper)
-        # Position: 0.5 inch right of paper edge (same line as D4, D6)
-        bottom_margin = caption_y - paper_y
-        if bottom_margin > 0.1:  # Only show if there's a meaningful margin
-            d12_x = paper_x + paper_w + 0.5
-            draw_dim_line(ax, d12_x, paper_y, caption_y, f"{bottom_margin:.2f}\"", dim_id="D12")
-
-        # D2: Left Margin Dimension (from left edge of paper to left of image)
-        # Position: 1/2 inch above paper top
-        left_margin = img_x - paper_x
-        draw_horizontal_dim_line(ax, paper_y + paper_h + 0.5, paper_x, img_x, f"{left_margin:.2f}\"", dim_id="D2")
-
-        # D16: Image width
-        # Position: 1/2 inch above paper top (same line as D2)
-        draw_horizontal_dim_line(ax, paper_y + paper_h + 0.5, img_x, img_x + img_w, f"{img_w:.2f}\"", dim_id="D16")
-
-        # D3: Right Margin Dimension (from right of image to right edge of paper)
-        # Position: 1/2 inch above paper top (same line as D2)
-        right_margin = (paper_x + paper_w) - (img_x + img_w)
-        draw_horizontal_dim_line(ax, paper_y + paper_h + 0.5, img_x + img_w, paper_x + paper_w, f"{right_margin:.2f}\"", dim_id="D3")
-
-        # D9: Caption box left edge position (from left edge of paper to left of caption box)
-        # Position: 0.5 inch below paper bottom
-        caption_left_margin = caption_x - paper_x
-        draw_horizontal_dim_line(ax, paper_y - 0.5, paper_x, caption_x, f"{caption_left_margin:.2f}\"", dim_id="D9")
-
-        # D10: Caption box width
-        # Position: 0.5 inch below paper bottom (same line as D9)
-        draw_horizontal_dim_line(ax, paper_y - 0.5, caption_x, caption_x + caption_w, f"{caption_w:.2f}\"", dim_id="D10")
-
-        # D15: Caption box right margin (from right edge of caption box to right edge of paper)
-        # Position: 0.5 inch below paper bottom (same line as D9, D10)
-        caption_right_margin = (paper_x + paper_w) - (caption_x + caption_w)
-        if caption_right_margin > 0.1:  # Only show if there's a meaningful margin
-            draw_horizontal_dim_line(ax, paper_y - 0.5, caption_x + caption_w, paper_x + paper_w, f"{caption_right_margin:.2f}\"", dim_id="D15")
-
-        # D11: Double column gutter width (only for double_col layouts)
-        # Position: 1/2 inch above paper top (same line as D2/D3)
-        if special_mode == 'double_col' and gutter:
-            col_w = (caption_w - gutter) / 2
-            gutter_x_start = caption_x + col_w
-            gutter_x_end = caption_x + col_w + gutter
-            draw_horizontal_dim_line(ax, paper_y + paper_h + 0.5, gutter_x_start, gutter_x_end, f"{gutter:.2f}\"", dim_id="D11")
-
-        # D7: Overall paper width
-        # Position: 1 inch below paper bottom
-        draw_horizontal_dim_line(ax, paper_y - 1.0, paper_x, paper_x + paper_w, f"{paper_w}\"", dim_id="D7", offset=0)
-
-        # D8: Overall paper height
-        # Position: 1 inch right of paper edge
-        draw_dim_line(ax, paper_x + paper_w + 1.0, paper_y, paper_y + paper_h, f"{paper_h}\"", dim_id="D8")
-
-    # Clean up
-    ax.axis('off')
-
-    os.makedirs(output_dir, exist_ok=True)
-    output_path = os.path.join(output_dir, filename)
-    if mode == "print":
-        # Print mode: save exact figure size, no cropping
-        plt.savefig(output_path, facecolor=fig.get_facecolor(), edgecolor='none')
+    # Draw back paper
+    if back_paper_border:
+        draw_border_inset(ax, back_paper_x, paper_y, paper_w, paper_h, back_paper_border, back_paper_bg)
+        paper_edge = patches.Rectangle((back_paper_x, paper_y), paper_w, paper_h,
+                                        linewidth=0.8, edgecolor=BLUE, facecolor='none')
+        ax.add_patch(paper_edge)
     else:
-        # Design mode: tight crop with padding for dimension lines
-        plt.savefig(output_path, bbox_inches='tight', pad_inches=0.1)
-    plt.close()
-    print(f"Generated: {output_path}")
+        paper_rect = patches.Rectangle((back_paper_x, paper_y), paper_w, paper_h,
+                                        linewidth=0.8, edgecolor=BLUE, facecolor=back_paper_bg)
+        ax.add_patch(paper_rect)
 
-def draw_back(filename, title, paper_w, paper_h, paper_style, note_style,
-              note_dims, note_font_color, mode, personal_note_path, theme_name=None, output_dir='output'):
-    """Generate back side with centered personal note.
-
-    paper_style = {'background': hex, 'border': {'color': hex, 'width': val}}
-    note_style = {'background': hex, 'border': {'color': hex, 'width': val}}
-    note_dims = [width, height] - dimensions of note area (default 6x9)
-    note_font_color = hex color for note text
-    """
-    # Setup canvas and paper
-    fig, ax, paper_x, paper_y, title_block_top = setup_canvas(paper_w, paper_h, paper_style, mode)
-    draw_paper(ax, paper_x, paper_y, paper_w, paper_h, paper_style, mode)
-
-    # Calculate note position (centered on paper)
-    note_w, note_h = note_dims
-    note_x = paper_x + (paper_w - note_w) / 2
+    # Back note position (centered)
+    note_dims = back.get('note_dims', {'width': 6, 'height': 9})
+    note_w = note_dims['width']
+    note_h = note_dims['height']
+    note_x = back_paper_x + (paper_w - note_w) / 2
     note_y = paper_y + (paper_h - note_h) / 2
 
-    # Load personal note text if path provided
+    # Load personal note
     note_text = None
     if personal_note_path and os.path.exists(personal_note_path):
         try:
             with open(personal_note_path, 'r') as f:
                 note_text = f.read().strip()
         except Exception:
-            note_text = None
+            pass
 
-    # Text color for note (default to black)
-    text_color = note_font_color if note_font_color else '#000000'
+    back_text_color = back_font_color if back_font_color else '#000000'
 
-    # Draw note block using draw_content_block
     def render_note():
-        if mode == "design":
-            if note_text:
-                chars_per_line = int(note_w * 12)
-                wrapped = textwrap.fill(note_text, width=chars_per_line)
-                ax.text(note_x + 0.1, note_y + note_h - 0.1, wrapped,
-                        ha='left', va='top', color=text_color, fontsize=7)
-            else:
-                ax.text(note_x + note_w/2, note_y + note_h/2, "PERSONAL NOTE\n(Greeked)",
-                        ha='center', va='center', color='#666666', fontsize=8, alpha=0.6, style='italic')
+        if note_text:
+            chars_per_line = int(note_w * 7)
+            wrapped = textwrap.fill(note_text, width=chars_per_line)
+            ax.text(note_x + 0.1, note_y + note_h - 0.1, wrapped,
+                    ha='left', va='top', color=back_text_color, fontsize=12)
+        else:
+            ax.text(note_x + note_w/2, note_y + note_h/2, "PERSONAL NOTE\n(Greeked)",
+                    ha='center', va='center', color='#666666', fontsize=13, alpha=0.6, style='italic')
+    draw_content_block(ax, note_x, note_y, note_w, note_h, back_note_style, render_note)
 
-    draw_content_block(ax, note_x, note_y, note_w, note_h, note_style, render_note)
+    # Back dimensions
+    left_margin_back = note_x - back_paper_x
+    right_margin_back = (back_paper_x + paper_w) - (note_x + note_w)
+    top_margin_back = (paper_y + paper_h) - (note_y + note_h)
+    bottom_margin_back = note_y - paper_y
+    draw_dim_line(ax, back_paper_x - 0.5, paper_y + paper_h, note_y + note_h, f"{top_margin_back:.2f}\"", dim_id="D1")
+    draw_dim_line(ax, back_paper_x - 0.5, note_y, note_y + note_h, f"{note_h:.2f}\"", dim_id="D2")
+    draw_dim_line(ax, back_paper_x - 0.5, paper_y, note_y, f"{bottom_margin_back:.2f}\"", dim_id="D3")
+    draw_horizontal_dim_line(ax, paper_y - 0.5, back_paper_x, note_x, f"{left_margin_back:.2f}\"", dim_id="D4")
+    draw_horizontal_dim_line(ax, paper_y - 0.5, note_x, note_x + note_w, f"{note_w:.2f}\"", dim_id="D5")
+    draw_horizontal_dim_line(ax, paper_y - 0.5, note_x + note_w, back_paper_x + paper_w, f"{right_margin_back:.2f}\"", dim_id="D6")
+    draw_horizontal_dim_line(ax, paper_y - 1.0, back_paper_x, back_paper_x + paper_w, f"{paper_w}\"", dim_id="D7")
+    draw_dim_line(ax, back_paper_x + paper_w + 0.5, paper_y, paper_y + paper_h, f"{paper_h}\"", dim_id="D8")
 
-    # --- TITLE BLOCK (Bottom of Canvas) - Design mode only ---
-    if mode == "design":
-        title_block_y = title_block_top - TITLE_BLOCK_H
-        title_block_x = -1 + BORDER_MARGIN
-        title_block_w = (CANVAS_W - 1 - BORDER_MARGIN) - (-1 + BORDER_MARGIN)
+    # ===== SHARED TITLE BLOCK =====
+    title_block_x = -1 + BORDER_MARGIN
+    title_block_w = CANVAS_W - 2 * BORDER_MARGIN
 
-        # Draw title block border
-        title_block_border = patches.Rectangle((title_block_x, title_block_y), title_block_w, TITLE_BLOCK_H,
-                                               linewidth=2, edgecolor=BLUE, facecolor='white')
-        ax.add_patch(title_block_border)
+    title_block_border = patches.Rectangle((title_block_x, title_block_y), title_block_w, TITLE_BLOCK_H,
+                                           linewidth=2, edgecolor=BLUE, facecolor='white')
+    ax.add_patch(title_block_border)
 
-        # Divide title block into two sections
-        divider_x = title_block_x + title_block_w * 0.6
-        ax.plot([divider_x, divider_x], [title_block_y, title_block_y + TITLE_BLOCK_H],
-                color=BLUE, linewidth=1.5)
+    # Divide into 3 sections: Front info | Notes | Back info
+    section_w = title_block_w / 3
+    divider1_x = title_block_x + section_w
+    divider2_x = title_block_x + section_w * 2
+    ax.plot([divider1_x, divider1_x], [title_block_y, title_block_y + TITLE_BLOCK_H], color=BLUE, linewidth=1.5)
+    ax.plot([divider2_x, divider2_x], [title_block_y, title_block_y + TITLE_BLOCK_H], color=BLUE, linewidth=1.5)
 
-        # Title section (left side - 60%)
-        ax.text(title_block_x + 0.2, title_block_y + TITLE_BLOCK_H - 0.4, f"{title.upper()} - BACK",
-                fontsize=12, fontweight='bold', color=BLUE)
-        if theme_name:
-            ax.text(title_block_x + 0.2, title_block_y + TITLE_BLOCK_H - 0.8, theme_name.upper(),
-                    fontsize=12, fontweight='bold', color=BLUE)
-        ax.text(title_block_x + 0.2, title_block_y + 1.2, f"Paper Size: {paper_w}\" × {paper_h}\"",
-                fontsize=8, color='#333333')
+    # Front section (left)
+    front_theme_name = front_theme.get('name', 'Theme')
+    ax.text(title_block_x + 0.2, title_block_y + TITLE_BLOCK_H - 0.4, f"{title.upper()} - FRONT",
+            fontsize=16, fontweight='bold', color=BLUE)
+    ax.text(title_block_x + 0.2, title_block_y + TITLE_BLOCK_H - 0.8, front_theme_name.upper(),
+            fontsize=15, fontweight='bold', color=BLUE)
+    font_color_display = font_color if font_color else "black"
+    front_style_info = (
+        f"{format_style_for_display(paper_style, 'paper')}\n"
+        f"{format_style_for_display(img_style, 'img')}\n"
+        f"{format_style_for_display(caption_style, 'caption')}, font={font_color_display}"
+    )
+    ax.text(title_block_x + 0.2, title_block_y + 0.9, front_style_info,
+            fontsize=10, va='top', color='#333333', family='monospace')
 
-        # Style information
-        font_color_display = note_font_color if note_font_color else "black"
-        style_info = (
-            f"{format_style_for_display(paper_style, 'paper')}\n"
-            f"{format_style_for_display(note_style, 'note')}, font={font_color_display}"
-        )
-        ax.text(title_block_x + 0.2, title_block_y + 0.9, style_info,
-                fontsize=6, va='top', color='#333333', family='monospace')
+    # Notes section (center)
+    ax.text(divider1_x + 0.2, title_block_y + TITLE_BLOCK_H - 0.4, "INSTALLATION DATA",
+            fontsize=13, fontweight='bold', color=BLUE)
+    ax.text(divider1_x + 0.2, title_block_y + TITLE_BLOCK_H - 0.7, notes,
+            fontsize=11, va='top', color='#333333', wrap=True)
+    ax.text(divider1_x + 0.2, title_block_y + 0.5, f"Paper Size: {paper_w}\" × {paper_h}\"",
+            fontsize=12, color='#333333')
 
-        # Notes section (right side - 40%)
-        ax.text(divider_x + 0.2, title_block_y + TITLE_BLOCK_H - 0.4, "BACK SIDE",
-                fontsize=8, fontweight='bold', color=BLUE)
-        note_info = f"Note Area: {note_w}\" × {note_h}\"\nCentered on paper"
-        ax.text(divider_x + 0.2, title_block_y + TITLE_BLOCK_H - 0.7, note_info,
-                fontsize=7, va='top', color='#333333', wrap=True)
+    # Back section (right)
+    back_theme_name = back_theme.get('name', 'Theme')
+    ax.text(divider2_x + 0.2, title_block_y + TITLE_BLOCK_H - 0.4, f"{title.upper()} - BACK",
+            fontsize=16, fontweight='bold', color=BLUE)
+    ax.text(divider2_x + 0.2, title_block_y + TITLE_BLOCK_H - 0.8, back_theme_name.upper(),
+            fontsize=15, fontweight='bold', color=BLUE)
+    back_font_display = back_font_color if back_font_color else "black"
+    back_style_info = (
+        f"{format_style_for_display(back_paper_style, 'paper')}\n"
+        f"{format_style_for_display(back_note_style, 'note')}, font={back_font_display}"
+    )
+    ax.text(divider2_x + 0.2, title_block_y + 0.9, back_style_info,
+            fontsize=10, va='top', color='#333333', family='monospace')
 
-    # --- DIMENSIONS (Visual Aids) - Design mode only ---
-    if mode == "design":
-        # Calculate margins
-        left_margin = note_x - paper_x
-        right_margin = (paper_x + paper_w) - (note_x + note_w)
-        top_margin = (paper_y + paper_h) - (note_y + note_h)
-        bottom_margin = note_y - paper_y
+    # Add panel labels
+    ax.text(left_center, paper_y + paper_h + 1.5, "FRONT", ha='center', fontsize=19, fontweight='bold', color=BLUE)
+    ax.text(right_center, paper_y + paper_h + 1.5, "BACK", ha='center', fontsize=19, fontweight='bold', color=BLUE)
 
-        # D1: Top margin (from top of paper to top of note)
-        d1_x = paper_x - 0.5
-        draw_dim_line(ax, d1_x, paper_y + paper_h, note_y + note_h, f"{top_margin:.2f}\"", dim_id="D1")
-
-        # D2: Note height
-        d2_x = paper_x - 0.5
-        draw_dim_line(ax, d2_x, note_y, note_y + note_h, f"{note_h:.2f}\"", dim_id="D2")
-
-        # D3: Bottom margin (from bottom of note to bottom of paper)
-        d3_x = paper_x - 0.5
-        draw_dim_line(ax, d3_x, paper_y, note_y, f"{bottom_margin:.2f}\"", dim_id="D3")
-
-        # D4: Left margin
-        draw_horizontal_dim_line(ax, paper_y - 0.5, paper_x, note_x, f"{left_margin:.2f}\"", dim_id="D4")
-
-        # D5: Note width
-        draw_horizontal_dim_line(ax, paper_y - 0.5, note_x, note_x + note_w, f"{note_w:.2f}\"", dim_id="D5")
-
-        # D6: Right margin
-        draw_horizontal_dim_line(ax, paper_y - 0.5, note_x + note_w, paper_x + paper_w, f"{right_margin:.2f}\"", dim_id="D6")
-
-        # D7: Overall paper width
-        draw_horizontal_dim_line(ax, paper_y - 1.0, paper_x, paper_x + paper_w, f"{paper_w}\"", dim_id="D7", offset=0)
-
-        # D8: Overall paper height
-        draw_dim_line(ax, paper_x + paper_w + 0.5, paper_y, paper_y + paper_h, f"{paper_h}\"", dim_id="D8")
-
-    # Clean up
+    # Clean up and save
     ax.axis('off')
-
     os.makedirs(output_dir, exist_ok=True)
     output_path = os.path.join(output_dir, filename)
-    if mode == "print":
-        plt.savefig(output_path, facecolor=fig.get_facecolor(), edgecolor='none')
-    else:
-        plt.savefig(output_path, bbox_inches='tight', pad_inches=0.1)
+    plt.savefig(output_path, bbox_inches='tight', pad_inches=0.1)
     plt.close()
     print(f"Generated: {output_path}")
+    return output_path
 
-def generate_index_html(html_files, output_dir):
-    """Generate an index.html with navigation to all layout HTML files."""
-    # Extract just filenames for display
-    entries = []
+
+def generate_combined_html(html_files, output_dir):
+    """Generate an all.html with all layouts in continuous scrollable sequence."""
+    import re
+
+    all_pages = []
+
     for path in html_files:
-        filename = os.path.basename(path)
-        name = os.path.splitext(filename)[0]
-        entries.append({'filename': filename, 'name': name})
+        with open(path, 'r', encoding='utf-8') as f:
+            content = f.read()
 
+        # Extract layout name from filename
+        layout_name = os.path.splitext(os.path.basename(path))[0]
+
+        # Extract the pages-container content (greedy match to get all nested divs)
+        match = re.search(r'<div class="pages-container">(.*)</div>\s*\n\s*<!-- Blueprint -->', content, re.DOTALL)
+        # Extract the blueprint image
+        blueprint_match = re.search(r'<div class="blueprint">.*?<img src="([^"]+)"', content, re.DOTALL)
+        blueprint_img = blueprint_match.group(1) if blueprint_match else None
+
+        if match:
+            pages_content = match.group(1)
+            blueprint_html = f'<div class="blueprint"><img src="{blueprint_img}" alt="Blueprint"></div>' if blueprint_img else ''
+            # Add a section header for this layout
+            all_pages.append(f'''
+    <!-- {layout_name} -->
+    <div class="layout-section" id="{layout_name}">
+        <div class="layout-header">{layout_name}</div>
+        <div class="pages-row">
+            {pages_content}
+        </div>
+        {blueprint_html}
+    </div>''')
+
+    combined_pages = '\n'.join(all_pages)
+
+    # Build navigation
     nav_items = '\n'.join([
-        f'<a href="{e["filename"]}" target="preview" class="nav-item" data-index="{i}">{e["name"]}</a>'
-        for i, e in enumerate(entries)
+        f'<a href="#{os.path.splitext(os.path.basename(p))[0]}" class="nav-link">{os.path.splitext(os.path.basename(p))[0]}</a>'
+        for p in html_files
     ])
 
     html = f'''<!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Print Layout Designer - Index</title>
+    <title>All Layouts - Continuous Scroll</title>
     <style>
         * {{ box-sizing: border-box; margin: 0; padding: 0; }}
         body {{
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            display: flex;
-            height: 100vh;
-            overflow: hidden;
+            background: #ecf0f1;
+            padding: 20px;
         }}
-        .sidebar {{
-            width: 300px;
+        .layout-section {{
+            margin-bottom: 40px;
+            scroll-margin-top: 20px;
+        }}
+        .layout-header {{
             background: #2c3e50;
             color: white;
-            overflow-y: auto;
-            flex-shrink: 0;
-        }}
-        .sidebar h1 {{
-            padding: 20px;
-            font-size: 16px;
-            background: #1a252f;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: bold;
+            border-radius: 4px 4px 0 0;
             position: sticky;
             top: 0;
+            z-index: 10;
         }}
-        .nav-item {{
+        .pages-row {{
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            padding: 20px;
+            background: #ddd;
+            border-radius: 0 0 4px 4px;
+        }}
+        .page {{
+            position: relative;
+            overflow: hidden;
+            flex-shrink: 0;
+        }}
+        .image-box img {{
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }}
+        p {{
+            margin: 0 0 0.5em 0;
+        }}
+        p:last-child {{
+            margin-bottom: 0;
+        }}
+        .nav-sidebar {{
+            position: fixed;
+            right: 20px;
+            top: 20px;
+            background: rgba(44, 62, 80, 0.9);
+            padding: 10px;
+            border-radius: 4px;
+            max-height: 90vh;
+            overflow-y: auto;
+            z-index: 100;
+            font-size: 11px;
+        }}
+        .nav-link {{
             display: block;
-            padding: 12px 20px;
             color: #ecf0f1;
             text-decoration: none;
-            border-bottom: 1px solid #34495e;
-            font-size: 13px;
-            transition: background 0.2s;
+            padding: 4px 8px;
+            border-radius: 2px;
         }}
-        .nav-item:hover {{
-            background: #34495e;
-        }}
-        .nav-item.active {{
+        .nav-link:hover {{
             background: #3498db;
         }}
-        .preview-container {{
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            background: #ecf0f1;
+        .blueprint {{
+            text-align: center;
+            padding: 20px;
+            background: #ccc;
+            margin-top: 10px;
         }}
-        .toolbar {{
-            padding: 10px 20px;
-            background: white;
-            border-bottom: 1px solid #ddd;
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }}
-        .toolbar button {{
-            padding: 8px 16px;
-            border: 1px solid #3498db;
-            background: white;
-            color: #3498db;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 14px;
-        }}
-        .toolbar button:hover {{
-            background: #3498db;
-            color: white;
-        }}
-        .toolbar span {{
-            margin-left: auto;
-            color: #666;
-            font-size: 14px;
-        }}
-        iframe {{
-            flex: 1;
-            border: none;
-            background: white;
+        .blueprint img {{
+            max-width: 100%;
+            height: auto;
+            box-shadow: 0 0 10px rgba(0,0,0,0.2);
         }}
     </style>
 </head>
 <body>
-    <div class="sidebar">
-        <h1>Layouts ({len(entries)})</h1>
+    <div class="nav-sidebar">
+        <strong style="color: white; display: block; margin-bottom: 8px;">Jump to:</strong>
         {nav_items}
     </div>
-    <div class="preview-container">
-        <div class="toolbar">
-            <button onclick="prev()">← Previous</button>
-            <button onclick="next()">Next →</button>
-            <span id="counter">1 / {len(entries)}</span>
-        </div>
-        <iframe name="preview" id="preview"></iframe>
-    </div>
-    <script>
-        const items = document.querySelectorAll('.nav-item');
-        let current = 0;
-
-        function showItem(index) {{
-            if (index < 0) index = items.length - 1;
-            if (index >= items.length) index = 0;
-            current = index;
-
-            items.forEach(item => item.classList.remove('active'));
-            items[current].classList.add('active');
-            items[current].click();
-            items[current].scrollIntoView({{ block: 'nearest' }});
-            document.getElementById('counter').textContent = (current + 1) + ' / ' + items.length;
-        }}
-
-        function prev() {{ showItem(current - 1); }}
-        function next() {{ showItem(current + 1); }}
-
-        document.addEventListener('keydown', (e) => {{
-            if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {{ prev(); e.preventDefault(); }}
-            if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {{ next(); e.preventDefault(); }}
-        }});
-
-        items.forEach((item, i) => {{
-            item.addEventListener('click', () => {{
-                current = i;
-                items.forEach(it => it.classList.remove('active'));
-                item.classList.add('active');
-                document.getElementById('counter').textContent = (current + 1) + ' / ' + items.length;
-            }});
-        }});
-
-        // Load first item
-        if (items.length > 0) showItem(0);
-    </script>
+    {combined_pages}
 </body>
 </html>
 '''
 
-    index_path = os.path.join(output_dir, 'index.html')
-    with open(index_path, 'w', encoding='utf-8') as f:
+    all_path = os.path.join(output_dir, 'all.html')
+    with open(all_path, 'w', encoding='utf-8') as f:
         f.write(html)
 
-    print(f"Generated: {index_path}")
-    return index_path
+    print(f"Generated: {all_path}")
+    return all_path
 
 
 # Run Generator
@@ -1104,7 +1010,7 @@ if __name__ == "__main__":
     if os.path.exists(output_dir):
         shutil.rmtree(output_dir)
 
-    batch_entries, mode, image_path_landscape, image_path_portrait, text_path, personal_note_path = load_batch(batch_path)
+    batch_entries, mode, image_path_landscape, image_path_portrait, text_path, personal_note_path, show_blueprints = load_batch(batch_path)
 
     if not batch_entries:
         print(f"Error: No entries in {batch_path} batch list.")
@@ -1120,7 +1026,8 @@ if __name__ == "__main__":
         with open(personal_note_path, 'r') as f:
             note_content = f.read().strip()
 
-    print(f"Generating {len(batch_entries)} batch entries (PNG + HTML)...")
+    output_types = "PNG + HTML" if show_blueprints else "HTML only"
+    print(f"Generating {len(batch_entries)} batch entries ({output_types})...")
     print(f"Output directory: {output_dir}")
 
     html_files = []
@@ -1140,62 +1047,24 @@ if __name__ == "__main__":
         front_theme = load_theme(front_theme_path)
         back_theme = load_theme(back_theme_path)
 
-        # Build styles from theme + layout
-        paper_style, img_style, caption_style, font_color = build_front_styles(layout, front_theme)
-        back_paper_style, back_note_style, back_font_color = build_back_styles(layout, back_theme)
-
-        # Extract geometry from layout
-        front = layout.get('front', {})
-        back = layout.get('back', {})
-
-        # --- Generate PNG (design blueprints) ---
-        front_filename = f"{layout_name}_front_{front_theme_name}.png"
-        back_filename = f"{layout_name}_back_{back_theme_name}.png"
-
-        draw_canvas(
-            filename=front_filename,
-            title=layout.get('title', layout_name),
-            layout_type="Standard",
-            orientation="Portrait",
-            paper_w=layout['paper_size']['width'],
-            paper_h=layout['paper_size']['height'],
-            paper_style=paper_style,
-            img_style=img_style,
-            caption_style=caption_style,
-            img_w=front['img_dims']['width'],
-            img_h=front['img_dims']['height'],
-            img_margins={'left': front['img_pos']['left'], 'top': front['img_pos']['top']},
-            caption_dims=[front['caption_dims']['width'], front['caption_dims']['height']],
-            caption_pos=front['caption_pos'],
-            notes=layout.get('notes', ''),
-            special_mode=front.get('special'),
-            gutter=front.get('gutter'),
-            mode="design",
-            image_path_landscape=image_path_landscape,
-            image_path_portrait=image_path_portrait,
-            text_path=text_path,
-            font_color=font_color,
-            theme_name=front_theme_name,
-            output_dir=output_dir
-        )
-
-        note_dims = back.get('note_dims', {'width': 6, 'height': 9})
-        draw_back(
-            filename=back_filename,
-            title=layout.get('title', layout_name),
-            paper_w=layout['paper_size']['width'],
-            paper_h=layout['paper_size']['height'],
-            paper_style=back_paper_style,
-            note_style=back_note_style,
-            note_dims=[note_dims['width'], note_dims['height']],
-            note_font_color=back_font_color,
-            mode="design",
-            personal_note_path=personal_note_path,
-            theme_name=back_theme_name,
-            output_dir=output_dir
-        )
+        # --- Generate combined PNG blueprint (if enabled) ---
+        blueprint_filename = None
+        if show_blueprints:
+            blueprint_filename = f"{layout_name}_{front_theme_name}_blueprint.png"
+            draw_combined_blueprint(
+                filename=blueprint_filename,
+                layout=layout,
+                front_theme=front_theme,
+                back_theme=back_theme,
+                image_path_landscape=image_path_landscape,
+                image_path_portrait=image_path_portrait,
+                text_path=text_path,
+                personal_note_path=personal_note_path,
+                output_dir=output_dir
+            )
 
         # --- Generate HTML (print preview) ---
+        front = layout.get('front', {})
         img_w = front['img_dims']['width']
         img_h = front['img_dims']['height']
         image_path = image_path_landscape if img_w > img_h else image_path_portrait
@@ -1210,15 +1079,14 @@ if __name__ == "__main__":
             note_content=note_content,
             layout_name=f"{layout_name}_{front_theme_name}",
             output_dir=output_dir,
-            front_png=front_filename,
-            back_png=back_filename
+            blueprint_png=blueprint_filename
         )
         html_files.append(html_path)
 
-    # Generate index page
-    index_path = generate_index_html(html_files, output_dir)
+    # Generate combined all.html
+    all_path = generate_combined_html(html_files, output_dir)
 
     print("Done!")
 
-    # Open index in browser
-    webbrowser.open('file://' + os.path.abspath(index_path))
+    # Open all.html in browser (continuous scroll view)
+    webbrowser.open('file://' + os.path.abspath(all_path))

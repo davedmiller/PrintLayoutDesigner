@@ -1,149 +1,70 @@
 {
   "mode": "design",
+  "show_blueprints": true,
   "image_path_landscape": "/Users/dave/Documents/ClaudeApps/PrintLayoutDesigner/test/assets/flower.tif",
   "image_path_portrait": "/Users/dave/Documents/ClaudeApps/PrintLayoutDesigner/test/assets/dae.tif",
   "text_path": "/Users/dave/Documents/ClaudeApps/PrintLayoutDesigner/test/assets/caption.md",
   "personal_note_path": "/Users/dave/Documents/ClaudeApps/PrintLayoutDesigner/test/assets/personal note.md",
   "batch": [
     {
-      "layout": "01_ClassicMuseum_Land_8-5x11.json",
-      "front_theme": "sandy-beach-with-foamy-waves-and bright sky_light.json",
-      "back_theme": "Blue Denim Jeans_dark.json"
-    },
-    {
-      "layout": "02_ClassicMuseum_Port_8-5x11.json",
-      "front_theme": "Modern-concrete-house_dark.json",
-      "back_theme": "Antique Christmas_light.json"
-    },
-    {
-      "layout": "03_ArtBook_Land_8-5x11.json",
-      "front_theme": "Turbulent-Blue-Water-Splash_dark.json",
-      "back_theme": "fresh-mint-leaves_dark.json"
-    },
-    {
-      "layout": "04_ArtBook_Port_8-5x11.json",
-      "front_theme": "fresh-mint-leaves_light.json",
-      "back_theme": "Blue Denim Jeans_dark.json"
-    },
-    {
-      "layout": "05_Footer_Land_8-5x11.json",
-      "front_theme": "Blue Denim Jeans_light.json",
-      "back_theme": "fresh-mint-leaves_light.json"
-    },
-    {
-      "layout": "06_Footer_Port_8-5x11.json",
-      "front_theme": "Antique Christmas_light.json",
-      "back_theme": "Antique Christmas_dark.json"
-    },
-    {
-      "layout": "07_SkinnyText_Land_8-5x11.json",
-      "front_theme": "Antique Christmas_dark.json",
-      "back_theme": "Blue Denim Jeans_light.json"
-    },
-    {
-      "layout": "08_SkinnyText_Port_8-5x11.json",
-      "front_theme": "Turbulent-Blue-Water-Splash_dark.json",
-      "back_theme": "sandy-beach-with-foamy-waves-and bright sky_light.json"
-    },
-    {
-      "layout": "09_VisualAnchor_Land_8-5x11.json",
+      "layout": "T01_Align_Left_Top.json",
       "front_theme": "Christmas_light.json",
-      "back_theme": "Antique Christmas_dark.json"
+      "back_theme": "simple_light.json",
+      "description": "Alignment: left/top (default)"
     },
     {
-      "layout": "10_VisualAnchor_Port_8-5x11.json",
-      "front_theme": "Modern-concrete-house_light.json",
-      "back_theme": "sandy-beach-with-foamy-waves-and bright sky_light.json"
-    },
-    {
-      "layout": "11_HighGallery_Land_8-5x11.json",
-      "front_theme": "fresh-mint-leaves_dark.json",
-      "back_theme": "Modern-concrete-house_light.json"
-    },
-    {
-      "layout": "12_HighGallery_Port_8-5x11.json",
-      "front_theme": "Blue Denim Jeans_dark.json",
-      "back_theme": "fresh-mint-leaves_dark.json"
-    },
-    {
-      "layout": "13_AsymOffset_Land_8-5x11.json",
+      "layout": "T02_Align_Center_Middle.json",
       "front_theme": "Blue Denim Jeans_light.json",
-      "back_theme": "Turbulent-Blue-Water-Splash_dark.json"
+      "back_theme": "simple_light.json",
+      "description": "Alignment: center/middle"
     },
     {
-      "layout": "14_AsymOffset_Port_8-5x11.json",
-      "front_theme": "sandy-beach-with-foamy-waves-and bright sky_dark.json",
-      "back_theme": "Modern-concrete-house_dark.json"
-    },
-    {
-      "layout": "15_ClassicMuseum_Land_11x14.json",
-      "front_theme": "Christmas_dark.json",
-      "back_theme": "Modern-concrete-house_light.json"
-    },
-    {
-      "layout": "16_ClassicMuseum_Port_11x14.json",
-      "front_theme": "Modern-concrete-house_dark.json",
-      "back_theme": "Christmas_dark.json"
-    },
-    {
-      "layout": "17_ArtBook_Land_11x14.json",
-      "front_theme": "Antique Christmas_light.json",
-      "back_theme": "Christmas_light.json"
-    },
-    {
-      "layout": "18_ArtBook_Port_11x14.json",
-      "front_theme": "sandy-beach-with-foamy-waves-and bright sky_light.json",
-      "back_theme": "Christmas_dark.json"
-    },
-    {
-      "layout": "19_Footer_Land_11x14.json",
-      "front_theme": "Blue Denim Jeans_dark.json",
-      "back_theme": "Blue Denim Jeans_light.json"
-    },
-    {
-      "layout": "20_Footer_Port_11x14.json",
-      "front_theme": "Turbulent-Blue-Water-Splash_light.json",
-      "back_theme": "sandy-beach-with-foamy-waves-and bright sky_dark.json"
-    },
-    {
-      "layout": "21_SkinnyText_Land_11x14.json",
-      "front_theme": "sandy-beach-with-foamy-waves-and bright sky_dark.json",
-      "back_theme": "Antique Christmas_light.json"
-    },
-    {
-      "layout": "22_SkinnyText_Port_11x14.json",
-      "front_theme": "Modern-concrete-house_light.json",
-      "back_theme": "sandy-beach-with-foamy-waves-and bright sky_dark.json"
-    },
-    {
-      "layout": "23_VisualAnchor_Land_11x14.json",
-      "front_theme": "Turbulent-Blue-Water-Splash_light.json",
-      "back_theme": "Turbulent-Blue-Water-Splash_light.json"
-    },
-    {
-      "layout": "24_VisualAnchor_Port_11x14.json",
-      "front_theme": "Christmas_dark.json",
-      "back_theme": "Christmas_light.json"
-    },
-    {
-      "layout": "25_HighGallery_Land_11x14.json",
-      "front_theme": "fresh-mint-leaves_dark.json",
-      "back_theme": "Modern-concrete-house_dark.json"
-    },
-    {
-      "layout": "26_HighGallery_Port_11x14.json",
-      "front_theme": "Antique Christmas_dark.json",
-      "back_theme": "Turbulent-Blue-Water-Splash_dark.json"
-    },
-    {
-      "layout": "27_AsymOffset_Land_11x14.json",
-      "front_theme": "Christmas_light.json",
-      "back_theme": "fresh-mint-leaves_light.json"
-    },
-    {
-      "layout": "28_AsymOffset_Port_11x14.json",
+      "layout": "T03_Align_Right_Bottom.json",
       "front_theme": "fresh-mint-leaves_light.json",
-      "back_theme": "Turbulent-Blue-Water-Splash_light.json"
+      "back_theme": "simple_light.json",
+      "description": "Alignment: right/bottom"
+    },
+    {
+      "layout": "T04_Align_Justify_Top.json",
+      "front_theme": "Antique Christmas_light.json",
+      "back_theme": "simple_light.json",
+      "description": "Alignment: justify/top"
+    },
+    {
+      "layout": "T05_Font_Small.json",
+      "front_theme": "Modern-concrete-house_light.json",
+      "back_theme": "simple_light.json",
+      "description": "Font size: 6pt (minimum boundary)"
+    },
+    {
+      "layout": "T06_Font_Large.json",
+      "front_theme": "Turbulent-Blue-Water-Splash_light.json",
+      "back_theme": "simple_light.json",
+      "description": "Font size: 18pt (overflow boundary)"
+    },
+    {
+      "layout": "T07_Font_Monospace.json",
+      "front_theme": "sandy-beach-with-foamy-waves-and bright sky_light.json",
+      "back_theme": "simple_light.json",
+      "description": "Font family: monospace"
+    },
+    {
+      "layout": "T08_DoubleCol_Center.json",
+      "front_theme": "Christmas_dark.json",
+      "back_theme": "simple_light.json",
+      "description": "Double column with center alignment"
+    },
+    {
+      "layout": "T09_TinyCaption.json",
+      "front_theme": "Blue Denim Jeans_dark.json",
+      "back_theme": "simple_light.json",
+      "description": "Boundary: tiny caption box (0.75\")"
+    },
+    {
+      "layout": "T10_LargeNote.json",
+      "front_theme": "fresh-mint-leaves_dark.json",
+      "back_theme": "simple_light.json",
+      "description": "Boundary: large note area (7.5x10\")"
     }
   ]
 }
