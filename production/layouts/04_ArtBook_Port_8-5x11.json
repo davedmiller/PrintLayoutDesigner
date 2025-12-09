@@ -38,7 +38,7 @@
     "note_pos": "centered",
     "border_widths": {
       "paper": null,
-      "note": null
+      "note": 0.066667
     }
   },
   "notes": "Layout: Art Book\nPaper: 8-5x11\nImg: Top Right (1.5\" Top, 1\" Right)\nTxt: Bottom Left (1.5\" Bottom, 1\" Left)"

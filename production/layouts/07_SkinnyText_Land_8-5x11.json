@@ -37,8 +37,8 @@
     },
     "note_pos": "centered",
     "border_widths": {
-      "paper": 0.5,
-      "note": 0.0625
+      "paper": null,
+      "note": 0.066667
     }
   },
   "notes": "Layout: Skinny Text\nPaper: 8-5x11\nImg: Centered Top\nTxt: Two 2.75\" columns with 0.5\" gutter."

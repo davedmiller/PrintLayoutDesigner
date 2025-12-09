@@ -1,0 +1,23 @@
+{
+  "name": "Simple",
+  "source": "custom",
+  "mode": "light",
+  "colors": {
+    "background": "#FFFFFF",
+    "base": "#B3B3B3",
+    "secondary": "#F7F7F7",
+    "accent": "#B3B3B3",
+    "text": "#333333"
+  },
+  "styles": {
+    "paper_background": "background",
+    "paper_border": "base",
+    "img_background": "background",
+    "img_border": "accent",
+    "caption_background": "secondary",
+    "caption_border": "accent",
+    "note_background": "secondary",
+    "note_border": "accent",
+    "font_color": "text"
+  }
+}

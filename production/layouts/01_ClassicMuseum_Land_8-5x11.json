@@ -37,8 +37,8 @@
     },
     "note_pos": "centered",
     "border_widths": {
-      "paper": 0.5,
-      "note": 0.0625
+      "paper": null,
+      "note": 0.066667
     }
   },
   "notes": "Layout: Classic Museum\nPaper: 8-5x11\nOrientation: Landscape Img\nTop Margin: 2\"\nText Gap: 1\""

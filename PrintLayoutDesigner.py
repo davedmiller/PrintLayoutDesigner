@@ -3,10 +3,15 @@ matplotlib.use('Agg')  # Use non-interactive backend for cleaner PNG output
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 import matplotlib.image as mpimg
+import glob
 import json
+import markdown
 import os
+import shutil
+import subprocess
 import sys
 import textwrap
+import webbrowser
 
 # --- CONFIGURATION ---
 VERSION = "4.0.0"
@@ -20,7 +25,7 @@ PAPER_W = 8.5
 PAPER_H = 11
 
 DPI = 150  # High resolution for crisp text
-BLUE = '#1E3D59'
+BLUE = '#4A90D9'
 CANVAS_COLOR = '#F2F2F2'
 BORDER_MARGIN = 0.25  # Canvas border margin
 TITLE_BLOCK_H = 2.5  # Title block height
@@ -112,6 +117,223 @@ def build_back_styles(layout, theme):
     font_color = resolve_color(theme, 'font_color')
 
     return paper_style, note_style, font_color
+
+
+# --- HTML GENERATION ---
+
+def render_markdown_to_html(text):
+    """Convert markdown text to HTML."""
+    if not text:
+        return ''
+    return markdown.markdown(text, extensions=['nl2br'])
+
+
+def get_text_style_defaults():
+    """Return default text style values."""
+    return {
+        'align_h': 'left',
+        'align_v': 'top',
+        'font': 'Georgia, serif',
+        'size': 10
+    }
+
+
+def get_css_text_alignment(text_style):
+    """Convert text_style to CSS properties for text alignment."""
+    defaults = get_text_style_defaults()
+    align_h = text_style.get('align_h', defaults['align_h'])
+    align_v = text_style.get('align_v', defaults['align_v'])
+    font = text_style.get('font', defaults['font'])
+    size = text_style.get('size', defaults['size'])
+
+    # Horizontal alignment maps directly to CSS text-align
+    css_text_align = align_h if align_h in ('left', 'center', 'right', 'justify') else 'left'
+
+    # Vertical alignment via flexbox
+    css_align_items = {'top': 'flex-start', 'middle': 'center', 'bottom': 'flex-end'}.get(align_v, 'flex-start')
+
+    return {
+        'text_align': css_text_align,
+        'align_items': css_align_items,
+        'font_family': font,
+        'font_size': size
+    }
+
+
+def generate_box_css(x, y, w, h, style, paper_h):
+    """Generate CSS for a positioned box with optional border."""
+    # Convert from bottom-left origin to top-left origin
+    top = paper_h - y - h
+
+    bg = style.get('background', '#FFFFFF') if style else '#FFFFFF'
+    border = style.get('border') if style else None
+
+    css = f"position: absolute; left: {x}in; top: {top}in; width: {w}in; height: {h}in; "
+    css += f"background: {bg}; box-sizing: border-box; "
+
+    if border and border.get('width') and border.get('color'):
+        border_width = border['width']
+        border_color = border['color']
+        css += f"border: {border_width}in solid {border_color}; "
+
+    return css
+
+
+def generate_html_output(batch_entry, layout, front_theme, back_theme,
+                         image_path, text_content, note_content,
+                         layout_name, output_dir):
+    """Generate HTML file for print mode output."""
+
+    paper_w = layout['paper_size']['width']
+    paper_h = layout['paper_size']['height']
+    front = layout.get('front', {})
+    back = layout.get('back', {})
+
+    # Build styles
+    paper_style, img_style, caption_style, font_color = build_front_styles(layout, front_theme)
+    back_paper_style, back_note_style, back_font_color = build_back_styles(layout, back_theme)
+
+    # Get text styles with defaults
+    front_text_style = front.get('text_style', {})
+    back_text_style = back.get('text_style', {})
+    front_css = get_css_text_alignment(front_text_style)
+    back_css = get_css_text_alignment(back_text_style)
+
+    # Image position and size
+    img_w = front['img_dims']['width']
+    img_h = front['img_dims']['height']
+    img_left = front['img_pos']['left']
+    img_top_margin = front['img_pos']['top']
+    img_y = paper_h - img_top_margin - img_h  # Convert to bottom-left origin
+
+    # Caption position and size
+    caption_w = front['caption_dims']['width']
+    caption_h = front['caption_dims']['height']
+    caption_left = front['caption_pos']['left']
+    caption_top_margin = front['caption_pos']['top']
+    caption_y = paper_h - caption_top_margin - caption_h
+
+    # Note position and size (centered)
+    note_dims = back.get('note_dims', {'width': 6, 'height': 9})
+    note_w = note_dims['width']
+    note_h = note_dims['height']
+    note_left = (paper_w - note_w) / 2
+    note_y = (paper_h - note_h) / 2
+
+    # Render markdown content
+    caption_html = render_markdown_to_html(text_content) if text_content else ''
+    note_html = render_markdown_to_html(note_content) if note_content else ''
+
+    # Generate CSS for each element
+    front_paper_bg = paper_style.get('background', '#FFFFFF') if paper_style else '#FFFFFF'
+    back_paper_bg = back_paper_style.get('background', '#FFFFFF') if back_paper_style else '#FFFFFF'
+
+    img_css = generate_box_css(img_left, img_y, img_w, img_h, img_style, paper_h)
+    caption_css = generate_box_css(caption_left, caption_y, caption_w, caption_h, caption_style, paper_h)
+    note_css = generate_box_css(note_left, note_y, note_w, note_h, back_note_style, paper_h)
+
+    # Handle special double-column layout
+    special_mode = front.get('special')
+    gutter = front.get('gutter', 0.25)
+
+    if special_mode == 'double_col':
+        col_w = (caption_w - gutter) / 2
+        col1_left = caption_left
+        col2_left = caption_left + col_w + gutter
+        col1_css = generate_box_css(col1_left, caption_y, col_w, caption_h, caption_style, paper_h)
+        col2_css = generate_box_css(col2_left, caption_y, col_w, caption_h, caption_style, paper_h)
+        caption_block_html = f'''
+            <div class="caption-col" style="{col1_css} display: flex; flex-direction: column; align-items: {front_css['align_items']}; overflow: hidden; padding: 0.1in;">
+                <div style="text-align: {front_css['text_align']}; font-family: {front_css['font_family']}; font-size: {front_css['font_size']}pt; color: {font_color or '#000000'};">{caption_html}</div>
+            </div>
+            <div class="caption-col" style="{col2_css} display: flex; flex-direction: column; align-items: {front_css['align_items']}; overflow: hidden; padding: 0.1in;">
+                <div style="text-align: {front_css['text_align']}; font-family: {front_css['font_family']}; font-size: {front_css['font_size']}pt; color: {font_color or '#000000'};"></div>
+            </div>'''
+    else:
+        caption_block_html = f'''
+            <div class="caption-box" style="{caption_css} display: flex; flex-direction: column; justify-content: {front_css['align_items']}; overflow: hidden; padding: 0.1in;">
+                <div style="text-align: {front_css['text_align']}; font-family: {front_css['font_family']}; font-size: {front_css['font_size']}pt; color: {font_color or '#000000'};">{caption_html}</div>
+            </div>'''
+
+    # Build the HTML document
+    html = f'''<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>{layout_name}</title>
+    <style>
+        @page {{
+            size: {paper_w}in {paper_h}in;
+            margin: 0;
+        }}
+        @media print {{
+            body {{ margin: 0; }}
+            .page {{ page-break-after: always; }}
+            .page:last-child {{ page-break-after: auto; }}
+        }}
+        * {{
+            box-sizing: border-box;
+        }}
+        body {{
+            margin: 0;
+            padding: 0;
+            font-family: Georgia, serif;
+        }}
+        .page {{
+            width: {paper_w}in;
+            height: {paper_h}in;
+            position: relative;
+            margin: 0 auto;
+            overflow: hidden;
+        }}
+        @media screen {{
+            .page {{
+                margin: 20px auto;
+                box-shadow: 0 0 10px rgba(0,0,0,0.3);
+            }}
+        }}
+        .image-box img {{
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }}
+        p {{
+            margin: 0 0 0.5em 0;
+        }}
+        p:last-child {{
+            margin-bottom: 0;
+        }}
+    </style>
+</head>
+<body>
+    <!-- Front Page -->
+    <div class="page" style="background: {front_paper_bg};">
+        <div class="image-box" style="{img_css} overflow: hidden;">
+            <img src="{image_path}" alt="Image">
+        </div>
+        {caption_block_html}
+    </div>
+
+    <!-- Back Page -->
+    <div class="page" style="background: {back_paper_bg};">
+        <div class="note-box" style="{note_css} display: flex; flex-direction: column; justify-content: {back_css['align_items']}; overflow: hidden; padding: 0.1in;">
+            <div style="text-align: {back_css['text_align']}; font-family: {back_css['font_family']}; font-size: {back_css['font_size']}pt; color: {back_font_color or '#000000'};">{note_html}</div>
+        </div>
+    </div>
+</body>
+</html>
+'''
+
+    # Write HTML file
+    os.makedirs(output_dir, exist_ok=True)
+    output_filename = f"{layout_name}.html"
+    output_path = os.path.join(output_dir, output_filename)
+
+    with open(output_path, 'w', encoding='utf-8') as f:
+        f.write(html)
+
+    print(f"Generated: {output_path}")
+    return output_path
 
 
 def load_batch(batch_path):
@@ -696,14 +918,32 @@ if __name__ == "__main__":
     batch_dir = os.path.dirname(batch_path) or '.'
     output_dir = os.path.join(batch_dir, 'output')
 
+    # Clear output directory
+    if os.path.exists(output_dir):
+        shutil.rmtree(output_dir)
+
     batch_entries, mode, image_path_landscape, image_path_portrait, text_path, personal_note_path = load_batch(batch_path)
 
     if not batch_entries:
         print(f"Error: No entries in {batch_path} batch list.")
         sys.exit(1)
 
-    print(f"Generating {len(batch_entries)} batch entries (front + back) in {mode} mode...")
+    # Load text content for HTML mode
+    text_content = None
+    note_content = None
+    if text_path and os.path.exists(text_path):
+        with open(text_path, 'r') as f:
+            text_content = f.read().strip()
+    if personal_note_path and os.path.exists(personal_note_path):
+        with open(personal_note_path, 'r') as f:
+            note_content = f.read().strip()
+
+    output_format = "html" if mode == "print" else "png"
+    print(f"Generating {len(batch_entries)} batch entries in {mode} mode ({output_format} output)...")
     print(f"Output directory: {output_dir}")
+
+    html_files = []
+
     for entry in batch_entries:
         layout_path = os.path.join(batch_dir, 'layouts', entry['layout'])
         front_theme_path = os.path.join(batch_dir, 'themes', entry['front_theme'])
@@ -719,61 +959,94 @@ if __name__ == "__main__":
         front_theme = load_theme(front_theme_path)
         back_theme = load_theme(back_theme_path)
 
-        # Build styles from theme + layout
-        paper_style, img_style, caption_style, font_color = build_front_styles(layout, front_theme)
-        back_paper_style, back_note_style, back_font_color = build_back_styles(layout, back_theme)
+        if mode == "print":
+            # HTML output for print mode
+            # Determine which image to use based on layout orientation
+            front = layout.get('front', {})
+            img_w = front['img_dims']['width']
+            img_h = front['img_dims']['height']
+            image_path = image_path_landscape if img_w > img_h else image_path_portrait
 
-        # Extract geometry from layout
-        front = layout.get('front', {})
-        back = layout.get('back', {})
+            html_path = generate_html_output(
+                batch_entry=entry,
+                layout=layout,
+                front_theme=front_theme,
+                back_theme=back_theme,
+                image_path=image_path,
+                text_content=text_content,
+                note_content=note_content,
+                layout_name=f"{layout_name}_{front_theme_name}",
+                output_dir=output_dir
+            )
+            html_files.append(html_path)
+        else:
+            # PNG output for design mode
+            # Build styles from theme + layout
+            paper_style, img_style, caption_style, font_color = build_front_styles(layout, front_theme)
+            back_paper_style, back_note_style, back_font_color = build_back_styles(layout, back_theme)
 
-        # Generate filenames: layout_side_theme.png
-        front_filename = f"{layout_name}_front_{front_theme_name}.png"
-        back_filename = f"{layout_name}_back_{back_theme_name}.png"
+            # Extract geometry from layout
+            front = layout.get('front', {})
+            back = layout.get('back', {})
 
-        # Generate front side
-        draw_canvas(
-            filename=front_filename,
-            title=layout.get('title', layout_name),
-            layout_type="Standard",
-            orientation="Portrait",
-            paper_w=layout['paper_size']['width'],
-            paper_h=layout['paper_size']['height'],
-            paper_style=paper_style,
-            img_style=img_style,
-            caption_style=caption_style,
-            img_w=front['img_dims']['width'],
-            img_h=front['img_dims']['height'],
-            img_margins={'left': front['img_pos']['left'], 'top': front['img_pos']['top']},
-            caption_dims=[front['caption_dims']['width'], front['caption_dims']['height']],
-            caption_pos=front['caption_pos'],
-            notes=layout.get('notes', ''),
-            special_mode=front.get('special'),
-            gutter=front.get('gutter'),
-            mode=mode,
-            image_path_landscape=image_path_landscape,
-            image_path_portrait=image_path_portrait,
-            text_path=text_path,
-            font_color=font_color,
-            theme_name=front_theme_name,
-            output_dir=output_dir
-        )
+            # Generate filenames: layout_side_theme.png
+            front_filename = f"{layout_name}_front_{front_theme_name}.png"
+            back_filename = f"{layout_name}_back_{back_theme_name}.png"
 
-        # Generate back side
-        note_dims = back.get('note_dims', {'width': 6, 'height': 9})
-        draw_back(
-            filename=back_filename,
-            title=layout.get('title', layout_name),
-            paper_w=layout['paper_size']['width'],
-            paper_h=layout['paper_size']['height'],
-            paper_style=back_paper_style,
-            note_style=back_note_style,
-            note_dims=[note_dims['width'], note_dims['height']],
-            note_font_color=back_font_color,
-            mode=mode,
-            personal_note_path=personal_note_path,
-            theme_name=back_theme_name,
-            output_dir=output_dir
-        )
+            # Generate front side
+            draw_canvas(
+                filename=front_filename,
+                title=layout.get('title', layout_name),
+                layout_type="Standard",
+                orientation="Portrait",
+                paper_w=layout['paper_size']['width'],
+                paper_h=layout['paper_size']['height'],
+                paper_style=paper_style,
+                img_style=img_style,
+                caption_style=caption_style,
+                img_w=front['img_dims']['width'],
+                img_h=front['img_dims']['height'],
+                img_margins={'left': front['img_pos']['left'], 'top': front['img_pos']['top']},
+                caption_dims=[front['caption_dims']['width'], front['caption_dims']['height']],
+                caption_pos=front['caption_pos'],
+                notes=layout.get('notes', ''),
+                special_mode=front.get('special'),
+                gutter=front.get('gutter'),
+                mode=mode,
+                image_path_landscape=image_path_landscape,
+                image_path_portrait=image_path_portrait,
+                text_path=text_path,
+                font_color=font_color,
+                theme_name=front_theme_name,
+                output_dir=output_dir
+            )
 
-    print("Done! Check your folder.")
+            # Generate back side
+            note_dims = back.get('note_dims', {'width': 6, 'height': 9})
+            draw_back(
+                filename=back_filename,
+                title=layout.get('title', layout_name),
+                paper_w=layout['paper_size']['width'],
+                paper_h=layout['paper_size']['height'],
+                paper_style=back_paper_style,
+                note_style=back_note_style,
+                note_dims=[note_dims['width'], note_dims['height']],
+                note_font_color=back_font_color,
+                mode=mode,
+                personal_note_path=personal_note_path,
+                theme_name=back_theme_name,
+                output_dir=output_dir
+            )
+
+    print("Done!")
+
+    # Open outputs in appropriate viewer
+    if mode == "print":
+        # Open first HTML file in browser
+        if html_files:
+            webbrowser.open('file://' + html_files[0])
+    else:
+        # Open all PNGs in Preview (alphabetically sorted)
+        png_files = sorted(glob.glob(os.path.join(output_dir, '*.png')))
+        if png_files:
+            subprocess.run(['open', '-a', 'Preview'] + png_files)

@@ -38,7 +38,7 @@
     "note_pos": "centered",
     "border_widths": {
       "paper": null,
-      "note": null
+      "note": 0.066667
     }
   },
   "notes": "Layout: High Gallery\nPaper: 11x14\nImg: High Center\nTxt: Low Center\nNote the vertical pause."

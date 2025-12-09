@@ -38,7 +38,7 @@
     "note_pos": "centered",
     "border_widths": {
       "paper": null,
-      "note": null
+      "note": 0.066667
     }
   },
   "notes": "Layout: Asym Offset\nPaper: 8-5x11\nImg: Pushed Right (1\" margin)\nTxt: Flush Left with Image."

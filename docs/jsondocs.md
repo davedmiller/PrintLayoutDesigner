@@ -95,6 +95,7 @@ Each layout file defines geometry only - no colors. Colors come from themes.
 | `special` | string | No | Special mode: `"double_col"` for two-column caption |
 | `gutter` | number | No | Gutter width between columns (inches) |
 | `border_widths` | object | Yes | Border widths for front elements |
+| `text_style` | object | No | Text styling options (HTML print mode only) |
 
 ### Front Border Widths Object
 
@@ -111,6 +112,7 @@ Each layout file defines geometry only - no colors. Colors come from themes.
 | `note_dims` | object | Yes | Note area dimensions |
 | `note_pos` | string | Yes | Position: `"centered"` |
 | `border_widths` | object | Yes | Border widths for back elements |
+| `text_style` | object | No | Text styling options (HTML print mode only) |
 
 ### Back Border Widths Object
 
@@ -118,6 +120,27 @@ Each layout file defines geometry only - no colors. Colors come from themes.
 |-------|------|-------------|
 | `paper` | number | Paper border width in inches |
 | `note` | number | Note area border width in inches |
+
+### Text Style Object (HTML print mode only)
+
+Controls text formatting for caption and note blocks. Ignored in design mode (PNG).
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `align_h` | string | `"left"` | Horizontal alignment: `"left"`, `"center"`, `"right"`, or `"justify"` |
+| `align_v` | string | `"top"` | Vertical alignment: `"top"`, `"middle"`, or `"bottom"` |
+| `font` | string | `"Georgia, serif"` | CSS font-family value |
+| `size` | number | `10` | Font size in points |
+
+Example:
+```json
+"text_style": {
+  "align_h": "justify",
+  "align_v": "top",
+  "font": "Helvetica, Arial, sans-serif",
+  "size": 12
+}
+```
 
 ### Dimensions Object
 
@@ -242,27 +265,31 @@ Maps color roles to layout elements.
 
 ## Rendering Modes
 
-| Mode | Canvas Size | Description |
-|------|-------------|-------------|
-| `design` | 18" x 24" | Full blueprint with dimension lines, title block, and labels |
-| `print` | paper size | Paper-sized output for print-ready templates |
+| Mode | Output Format | Description |
+|------|---------------|-------------|
+| `design` | PNG (18" x 24") | Technical blueprint with dimension lines, title block, and labels |
+| `print` | HTML | Print-ready output viewable in browser with full markdown support |
 
 ### Mode Comparison
 
-| Element | design | print |
-|---------|--------|-------|
+| Element | design (PNG) | print (HTML) |
+|---------|--------------|--------------|
+| Output format | PNG | HTML |
 | Canvas size | 18" x 24" | paper_size dimensions |
 | Canvas border | Yes | No |
 | Dimension lines | Yes | No |
 | Title block | Yes | No |
 | Box labels | Yes | No |
-| Paper with styles | Yes | Yes |
-| Image box with styles | Yes | Yes |
-| Caption box with styles | Yes | Yes |
+| Markdown rendering | No | Yes |
+| Emoji support | Limited | Full |
+| Text styling (text_style) | No | Yes |
+| Custom fonts | No | Yes |
 
 ---
 
 ## Output Files
+
+### Design Mode (PNG)
 
 Each batch entry generates two PNG files:
 
@@ -277,6 +304,25 @@ Example:
 01_ClassicMuseum_Land_8-5x11_back_Christmas_dark.png
 ```
 
+### Print Mode (HTML)
+
+Each batch entry generates one HTML file containing both front and back pages:
+
+```
+{layout}_{theme}.html
+```
+
+Example:
+```
+01_ClassicMuseum_Land_8-5x11_Christmas_light.html
+```
+
+The HTML output:
+- Uses CSS `@page` rules for proper print sizing
+- Displays front and back as separate pages
+- Opens automatically in your default browser
+- Can be printed via browser print dialog (Cmd+P)
+
 Files are written to `{dir}/output/` where `{dir}` is the directory containing the batch.json file. The output directory is created automatically if it doesn't exist.
 
 ---
@@ -285,6 +331,23 @@ Files are written to `{dir}/output/` where `{dir}` is the directory containing t
 
 - **Paper borders**: Drawn INSIDE the paper edge (inset, like a mat)
 - **Image/caption/note borders**: Drawn OUTSIDE the box
+
+---
+
+## Markdown Support (HTML print mode)
+
+Text files (`text_path` and `personal_note_path`) are rendered as Markdown in HTML print mode.
+
+Supported formatting:
+- **Bold**: `**text**` or `__text__`
+- *Italic*: `*text*` or `_text_`
+- Lists (bulleted and numbered)
+- Links: `[text](url)`
+- Headers: `# H1`, `## H2`, etc.
+- Line breaks preserved (newlines become `<br>`)
+- Emoji: Full native support 🎉📸⭐
+
+In design mode (PNG), text files are rendered as plain text with basic word wrapping.
 
 ---
 

@@ -37,8 +37,8 @@
     },
     "note_pos": "centered",
     "border_widths": {
-      "paper": 0.625,
-      "note": 0.125
+      "paper": null,
+      "note": 0.066667
     }
   },
   "notes": "Layout: Skinny Text\nPaper: 11x14\nImg: Left (1.5\" Margin)\nTxt: Right Column (3.5\" Wide)\nMagazine spread look."

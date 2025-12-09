@@ -38,7 +38,7 @@
     "note_pos": "centered",
     "border_widths": {
       "paper": null,
-      "note": null
+      "note": 0.066667
     }
   },
   "notes": "Layout: Footer\nPaper: 11x14\nImg: Optical Center\nText: Wide Footer (7\") anchored 1.5\" from bottom."
