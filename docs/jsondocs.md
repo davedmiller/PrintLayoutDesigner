@@ -1,38 +1,231 @@
-# layouts.json Documentation
+# JSON Configuration Documentation
 
-This file defines all print layout configurations.
+PrintLayoutDesigner uses three types of JSON files:
+- **batch.json** - Controls what gets generated (required)
+- **layouts/*.json** - Layout geometry definitions
+- **themes/*.json** - Color themes
 
-## Root Object
+## batch.json
 
-The JSON file is an object containing a global mode, sample content paths, and an array of layouts.
+Controls which layouts to generate and with which themes.
+
+### Root Object
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| `mode` | string | No | Rendering mode for all layouts (default: `"design"`) |
-| `image_path_landscape` | string | No | Path to sample image for landscape layouts (img_w > img_h). In design mode, renders the image instead of placeholder label. |
-| `image_path_portrait` | string | No | Path to sample image for portrait layouts (img_h >= img_w). In design mode, renders the image instead of placeholder label. |
-| `text_path` | string | No | Path to sample text file. In design mode, renders the text in caption boxes instead of placeholder label. |
-| `personal_note_path` | string | No | Path to personal note text file. Renders on the back side of each layout. |
-| `layouts` | array | Yes | Array of layout objects |
+| `mode` | string | No | Rendering mode: `"design"` or `"print"` (default: `"design"`) |
+| `image_path_landscape` | string | No | Path to sample image for landscape layouts (img_w > img_h) |
+| `image_path_portrait` | string | No | Path to sample image for portrait layouts (img_h >= img_w) |
+| `text_path` | string | No | Path to sample text file for captions |
+| `personal_note_path` | string | No | Path to personal note text file for back sides |
+| `batch` | array | Yes | Array of batch entry objects |
 
-When image or text paths are `null` or the files don't exist, placeholder labels are shown ("IMAGE WxH" and "CAPTION TEXT (Greeked)").
+### Batch Entry Object
 
-## Output Files
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `layout` | string | Yes | Layout name (matches filename in `layouts/` without `.json`) |
+| `front_theme` | string | Yes | Theme name for front side (matches filename in `themes/` without `.json`) |
+| `back_theme` | string | Yes | Theme name for back side |
 
-Each layout generates two PNG files:
-- **Front**: `XX_LayoutName_front.png` - Contains image and caption areas
-- **Back**: `XX_LayoutName_back.png` - Contains centered personal note area
+### Example batch.json
 
-The `file` field in JSON specifies the base filename; `_front` and `_back` suffixes are added automatically.
+```json
+{
+  "mode": "design",
+  "image_path_landscape": "/path/to/landscape.tif",
+  "image_path_portrait": "/path/to/portrait.tif",
+  "text_path": "/path/to/caption.md",
+  "personal_note_path": "/path/to/note.md",
+  "batch": [
+    {
+      "layout": "01_ClassicMuseum_Land_8-5x11",
+      "front_theme": "Christmas_light",
+      "back_theme": "Christmas_dark"
+    }
+  ]
+}
+```
+
+---
+
+## Layout Files (layouts/*.json)
+
+Each layout file defines geometry only - no colors. Colors come from themes.
+
+### Layout Object
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `name` | string | Yes | Layout identifier (matches filename) |
+| `title` | string | Yes | Display name for title block |
+| `paper_size` | object | Yes | Paper dimensions (see Dimensions Object) |
+| `front` | object | Yes | Front side geometry |
+| `back` | object | Yes | Back side geometry |
+| `notes` | string | Yes | Installation notes for title block |
+
+### Front Object
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `img_dims` | object | Yes | Image dimensions |
+| `img_pos` | object | Yes | Image position |
+| `caption_dims` | object | Yes | Caption dimensions |
+| `caption_pos` | object | Yes | Caption position |
+| `special` | string | No | Special mode: `"double_col"` for two-column caption |
+| `gutter` | number | No | Gutter width between columns (inches) |
+| `border_widths` | object | Yes | Border widths for front elements |
+
+### Front Border Widths Object
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `paper` | number | Paper border width in inches |
+| `img` | number | Image border width in inches |
+| `caption` | number or null | Caption border width (null = no border) |
+
+### Back Object
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `note_dims` | object | Yes | Note area dimensions |
+| `note_pos` | string | Yes | Position: `"centered"` |
+| `border_widths` | object | Yes | Border widths for back elements |
+
+### Back Border Widths Object
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `paper` | number | Paper border width in inches |
+| `note` | number | Note area border width in inches |
+
+### Dimensions Object
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `width` | number | Width in inches |
+| `height` | number | Height in inches |
+
+### Position Object
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `left` | number | Distance from left edge of paper (inches) |
+| `top` | number | Distance from top edge of paper (inches) |
+
+### Example Layout File
+
+```json
+{
+  "name": "01_ClassicMuseum_Land_8-5x11",
+  "title": "Classic Museum - Landscape",
+  "paper_size": {
+    "width": 8.5,
+    "height": 11
+  },
+  "front": {
+    "img_dims": {"width": 6, "height": 4},
+    "img_pos": {"left": 1.25, "top": 2},
+    "caption_dims": {"width": 6, "height": 1.75},
+    "caption_pos": {"left": 1.25, "top": 7.0},
+    "special": null,
+    "gutter": null,
+    "border_widths": {
+      "paper": 0.75,
+      "img": 0.125,
+      "caption": null
+    }
+  },
+  "back": {
+    "note_dims": {"width": 6, "height": 9},
+    "note_pos": "centered",
+    "border_widths": {
+      "paper": 0.5,
+      "note": 0.0625
+    }
+  },
+  "notes": "Layout: Classic Museum\nPaper: 8-5x11\nOrientation: Landscape Img"
+}
+```
+
+---
+
+## Theme Files (themes/*.json)
+
+Themes define colors and how they map to layout elements.
+
+### Theme Object
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `name` | string | Yes | Theme name |
+| `source` | string | No | Color source (e.g., `"adobe-color"`) |
+| `mode` | string | Yes | `"light"` or `"dark"` |
+| `colors` | object | Yes | Color palette |
+| `styles` | object | Yes | Color role mappings |
+
+### Colors Object
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `background` | string | Hex color for backgrounds |
+| `base` | string | Hex color for primary elements |
+| `secondary` | string | Hex color for secondary elements |
+| `accent` | string | Hex color for accent/highlight |
+| `text` | string | Hex color for text |
+
+### Styles Object
+
+Maps color roles to layout elements.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `paper_background` | string | Color role for paper fill |
+| `paper_border` | string | Color role for paper border |
+| `img_background` | string | Color role for image box fill |
+| `img_border` | string | Color role for image box border |
+| `caption_background` | string | Color role for caption box fill |
+| `caption_border` | string | Color role for caption box border |
+| `note_background` | string | Color role for note area fill |
+| `note_border` | string | Color role for note area border |
+| `font_color` | string | Color role for text |
+
+### Example Theme File
+
+```json
+{
+  "name": "Christmas",
+  "source": "adobe-color",
+  "mode": "light",
+  "colors": {
+    "background": "#F2F2F2",
+    "base": "#A69F3C",
+    "secondary": "#F22E2E",
+    "accent": "#D93829",
+    "text": "#537334"
+  },
+  "styles": {
+    "paper_background": "background",
+    "paper_border": "base",
+    "img_background": "secondary",
+    "img_border": "accent",
+    "caption_background": "secondary",
+    "caption_border": "accent",
+    "note_background": "secondary",
+    "note_border": "accent",
+    "font_color": "text"
+  }
+}
+```
+
+---
 
 ## Rendering Modes
 
-The `mode` field controls how all layouts are rendered.
-
 | Mode | Canvas Size | Description |
 |------|-------------|-------------|
-| `design` | 18" x 24" | Full blueprint canvas with dimension lines, title block, and labels inside image/caption boxes. Used for reviewing and documenting layouts. |
-| `print` | paper size | Paper-sized output with only the styled paper, image box, and caption box. No dimension lines, no title block, no labels. Used for generating print-ready templates. |
+| `design` | 18" x 24" | Full blueprint with dimension lines, title block, and labels |
+| `print` | paper size | Paper-sized output for print-ready templates |
 
 ### Mode Comparison
 
@@ -40,138 +233,47 @@ The `mode` field controls how all layouts are rendered.
 |---------|--------|-------|
 | Canvas size | 18" x 24" | paper_size dimensions |
 | Canvas border | Yes | No |
-| Dimension lines (D1-D16) | Yes | No |
+| Dimension lines | Yes | No |
 | Title block | Yes | No |
-| "IMAGE WxH" label | Yes | No |
-| "CAPTION TEXT" label | Yes | No |
+| Box labels | Yes | No |
 | Paper with styles | Yes | Yes |
 | Image box with styles | Yes | Yes |
 | Caption box with styles | Yes | Yes |
 
-## Layout Object Fields
+---
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `file` | string | Yes | Output filename (e.g., `"01_ClassicMuseum_Land_8-5x11.png"`) |
-| `title` | string | Yes | Layout name displayed in title block |
-| `paper_size` | object | Yes | Print paper dimensions (see Dimensions Object) |
-| `img_dims` | object | Yes | Image dimensions (see Dimensions Object) |
-| `img_pos` | object | Yes | Image position from paper edges (see Position Object) |
-| `caption_dims` | object | Yes | Caption box dimensions (see Dimensions Object) |
-| `caption_pos` | object | Yes | Caption box position from paper edges (see Position Object) |
-| `paper_style` | object | No | Paper styling (see Style Object) |
-| `img_style` | object | No | Image box styling (see Style Object) |
-| `caption_style` | object | No | Caption box styling (see Style Object) |
-| `notes` | string | Yes | Installation notes displayed in title block |
-| `special` | string | No | Special rendering mode: `"double_col"` splits caption into two columns |
-| `gutter` | number | No | Width of gutter between columns for double_col mode (inches) |
-| `font_color` | string | No | Hex color code for caption text (default: black) |
-| `back_paper_style` | object | No | Back side paper styling override (see Style Object). Default: white, no border. |
-| `back_note_style` | object | No | Back side note area styling override (see Style Object). Default: white with thin black border. |
-| `back_note_font_color` | string | No | Hex color code for personal note text. Default: black (#000000). |
-| `back_note_dims` | object | No | Personal note area dimensions (see Dimensions Object). Default: 6" x 9" |
+## Output Files
 
-## Back Side Defaults
+Each batch entry generates two PNG files:
 
-Back sides use simple, ink-efficient defaults unless explicitly overridden:
-
-| Property | Default Value |
-|----------|---------------|
-| `back_paper_style` | `{"background": "#FFFFFF", "border": null}` (white, no border) |
-| `back_note_style` | `{"background": "#FFFFFF", "border": {"color": "#000000", "width": 0.0625}}` (white with thin black border) |
-| `back_note_font_color` | `"#000000"` (black) |
-| `back_note_dims` | `{"width": 6, "height": 9}` |
-
-To customize the back side, add any of the `back_*` fields to override specific defaults.
-
-## Dimensions Object
-
-Used for `paper_size`, `img_dims`, `caption_dims`, and `back_note_dims`.
-
-| Field | Type | Description |
-|-------|------|-------------|
-| `width` | number | Width in inches |
-| `height` | number | Height in inches |
-
-## Position Object
-
-Used for `img_pos` and `caption_pos`. Specifies absolute position from paper edges.
-
-| Field | Type | Description |
-|-------|------|-------------|
-| `left` | number | Distance from left edge of paper (inches) |
-| `top` | number | Distance from top edge of paper (inches) |
-
-## Style Object
-
-Controls the background and border styling for paper, image, and caption areas.
-
-| Field | Type | Description |
-|-------|------|-------------|
-| `background` | string | Hex color code for fill (e.g., `"#FFFFFF"`) or `null` for default |
-| `border` | object | Border definition (see Border Object) or `null` for no border |
-
-### Border Object (nested in Style)
-
-| Field | Type | Description |
-|-------|------|-------------|
-| `color` | string | Hex color code for border (e.g., `"#CCCCCC"`) |
-| `width` | number | Border width in inches |
-
-### Style Behavior by Element
-
-- **paper_style.border**: Drawn INSIDE the paper edge (inset effect, like a mat)
-- **img_style.border**: Drawn OUTSIDE the image box
-- **caption_style.border**: Drawn OUTSIDE the caption box
-
-## Special Modes
-
-| Mode | Description |
-|------|-------------|
-| `double_col` | Caption split into two columns with gutter specified by `gutter` field |
-
-## Example File
-
-```json
-{
-  "mode": "design",
-  "image_path_landscape": "/path/to/landscape_image.jpg",
-  "image_path_portrait": "/path/to/portrait_image.jpg",
-  "text_path": "/path/to/sample_text.md",
-  "personal_note_path": "/path/to/personal_note.md",
-  "layouts": [
-    {
-      "file": "01_ClassicMuseum_Land_8-5x11.png",
-      "title": "Classic Museum - Landscape",
-      "paper_size": {"width": 8.5, "height": 11},
-      "img_dims": {"width": 6, "height": 4},
-      "img_pos": {"left": 1.25, "top": 2},
-      "caption_dims": {"width": 6, "height": 1.75},
-      "caption_pos": {"left": 1.25, "top": 7.0},
-      "paper_style": {"background": "#FFFFFF", "border": {"color": "#CCCCCC", "width": 0.5}},
-      "img_style": {"background": "#E8EFF5", "border": null},
-      "caption_style": {"background": null, "border": null},
-      "special": null,
-      "gutter": null,
-      "font_color": null,
-      "notes": "Layout: Classic Museum\nPaper: 8-5x11\nOrientation: Landscape Img\nTop Margin: 2\"\nText Gap: 1\""
-    }
-  ]
-}
+```
+{layout}_front_{theme}.png
+{layout}_back_{theme}.png
 ```
 
-This creates a layout in design mode with:
+Example:
+```
+01_ClassicMuseum_Land_8-5x11_front_Christmas_light.png
+01_ClassicMuseum_Land_8-5x11_back_Christmas_dark.png
+```
 
-**Front side:**
-- 8.5x11 inch paper with white background and gray (#CCCCCC) border inset 0.5 inches
-- 6x4 inch landscape image with light blue (#E8EFF5) background, positioned 1.25" left, 2" top
-- 6x1.75 inch caption with default background, positioned 1.25" left, 7" top
+Files are written to the `output/` directory.
 
-**Back side (using defaults):**
-- White paper with no border
-- 6x9 inch centered personal note area with thin black border
-- Black text
+---
 
-To customize the back, add `back_*` fields as needed.
+## Border Behavior
 
-To generate print-ready output instead, change `"mode": "design"` to `"mode": "print"`.
+- **Paper borders**: Drawn INSIDE the paper edge (inset, like a mat)
+- **Image/caption/note borders**: Drawn OUTSIDE the box
+
+---
+
+## Utility Scripts
+
+Scripts in `scripts/` directory:
+
+| Script | Purpose |
+|--------|---------|
+| `generate_batch.py` | Generate batch.json with random theme assignments |
+| `import_theme.py` | Import Adobe Color CSS palettes as theme files |
+| `migrate_layouts.py` | Migrate from old layouts.json format |
