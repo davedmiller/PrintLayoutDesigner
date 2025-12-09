@@ -281,7 +281,7 @@ def draw_canvas(filename, title, layout_type, orientation,
                    caption_dims, caption_pos,
                    notes, special_mode=None, gutter=None, mode="design",
                    image_path_landscape=None, image_path_portrait=None, text_path=None,
-                   font_color=None, theme_name=None):
+                   font_color=None, theme_name=None, output_dir='output'):
     """
     Generates a single canvas image.
     paper_w, paper_h = dimensions of the print paper (e.g., 8.5x11 or 11x14)
@@ -545,7 +545,8 @@ def draw_canvas(filename, title, layout_type, orientation,
     # Clean up
     ax.axis('off')
 
-    output_path = os.path.join('output', filename)
+    os.makedirs(output_dir, exist_ok=True)
+    output_path = os.path.join(output_dir, filename)
     if mode == "print":
         # Print mode: save exact figure size, no cropping
         plt.savefig(output_path, facecolor=fig.get_facecolor(), edgecolor='none')
@@ -556,7 +557,7 @@ def draw_canvas(filename, title, layout_type, orientation,
     print(f"Generated: {output_path}")
 
 def draw_back(filename, title, paper_w, paper_h, paper_style, note_style,
-              note_dims, note_font_color, mode, personal_note_path, theme_name=None):
+              note_dims, note_font_color, mode, personal_note_path, theme_name=None, output_dir='output'):
     """Generate back side with centered personal note.
 
     paper_style = {'background': hex, 'border': {'color': hex, 'width': val}}
@@ -678,7 +679,8 @@ def draw_back(filename, title, paper_w, paper_h, paper_style, note_style,
     # Clean up
     ax.axis('off')
 
-    output_path = os.path.join('output', filename)
+    os.makedirs(output_dir, exist_ok=True)
+    output_path = os.path.join(output_dir, filename)
     if mode == "print":
         plt.savefig(output_path, facecolor=fig.get_facecolor(), edgecolor='none')
     else:
@@ -691,6 +693,9 @@ if __name__ == "__main__":
     print(f"PrintLayoutDesigner v{VERSION}")
 
     batch_path = sys.argv[1] if len(sys.argv) > 1 else 'production/batch.json'
+    batch_dir = os.path.dirname(batch_path) or '.'
+    output_dir = os.path.join(batch_dir, 'output')
+
     batch_entries, mode, image_path_landscape, image_path_portrait, text_path, personal_note_path = load_batch(batch_path)
 
     if not batch_entries:
@@ -698,10 +703,11 @@ if __name__ == "__main__":
         sys.exit(1)
 
     print(f"Generating {len(batch_entries)} batch entries (front + back) in {mode} mode...")
+    print(f"Output directory: {output_dir}")
     for entry in batch_entries:
-        layout_path = entry['layout']
-        front_theme_path = entry['front_theme']
-        back_theme_path = entry['back_theme']
+        layout_path = os.path.join(batch_dir, 'layouts', entry['layout'])
+        front_theme_path = os.path.join(batch_dir, 'themes', entry['front_theme'])
+        back_theme_path = os.path.join(batch_dir, 'themes', entry['back_theme'])
 
         # Extract names from paths for filenames (remove directory and .json extension)
         layout_name = os.path.splitext(os.path.basename(layout_path))[0]
@@ -749,7 +755,8 @@ if __name__ == "__main__":
             image_path_portrait=image_path_portrait,
             text_path=text_path,
             font_color=font_color,
-            theme_name=front_theme_name
+            theme_name=front_theme_name,
+            output_dir=output_dir
         )
 
         # Generate back side
@@ -765,7 +772,8 @@ if __name__ == "__main__":
             note_font_color=back_font_color,
             mode=mode,
             personal_note_path=personal_note_path,
-            theme_name=back_theme_name
+            theme_name=back_theme_name,
+            output_dir=output_dir
         )
 
     print("Done! Check your folder.")

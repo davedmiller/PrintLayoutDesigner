@@ -7,14 +7,21 @@ PrintLayoutDesigner uses three types of JSON files:
 
 ## Directory Structure
 
+All paths are derived from the batch file location. Given `{dir}/batch.json`:
+- Layouts: `{dir}/layouts/`
+- Themes: `{dir}/themes/`
+- Output: `{dir}/output/`
+
 ```
 production/
   layouts/       # Production layouts
   themes/        # Production themes
+  output/        # Production output (auto-created)
   batch.json     # Production batch file
 test/
   layouts/       # Test layouts
   themes/        # Test themes
+  output/        # Test output (auto-created)
   batch.json     # Test batch file
 ```
 
@@ -37,9 +44,9 @@ Controls which layouts to generate and with which themes.
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| `layout` | string | Yes | Full path to layout file (e.g., `"production/layouts/01_ClassicMuseum.json"`) |
-| `front_theme` | string | Yes | Full path to theme file for front side |
-| `back_theme` | string | Yes | Full path to theme file for back side |
+| `layout` | string | Yes | Layout filename (e.g., `"01_ClassicMuseum.json"`) |
+| `front_theme` | string | Yes | Theme filename for front side |
+| `back_theme` | string | Yes | Theme filename for back side |
 
 ### Example batch.json
 
@@ -52,9 +59,9 @@ Controls which layouts to generate and with which themes.
   "personal_note_path": "/path/to/note.md",
   "batch": [
     {
-      "layout": "production/layouts/01_ClassicMuseum_Land_8-5x11.json",
-      "front_theme": "production/themes/Christmas_light.json",
-      "back_theme": "production/themes/Christmas_dark.json"
+      "layout": "01_ClassicMuseum_Land_8-5x11.json",
+      "front_theme": "Christmas_light.json",
+      "back_theme": "Christmas_dark.json"
     }
   ]
 }
@@ -270,7 +277,7 @@ Example:
 01_ClassicMuseum_Land_8-5x11_back_Christmas_dark.png
 ```
 
-Files are written to the `output/` directory.
+Files are written to `{dir}/output/` where `{dir}` is the directory containing the batch.json file. The output directory is created automatically if it doesn't exist.
 
 ---
 

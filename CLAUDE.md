@@ -11,19 +11,25 @@ Generates technical diagrams showing print layout specifications for gallery/mus
 
 ## Directory Structure
 
+All paths are derived from batch file location. Given `{dir}/batch.json`:
+- Layouts: `{dir}/layouts/`
+- Themes: `{dir}/themes/`
+- Output: `{dir}/output/` (auto-created)
+
 ```
 production/
   layouts/            # Production layout JSON files
   themes/             # Production theme JSON files
+  output/             # Production output (auto-created)
   batch.json          # Production batch configuration
 test/
   layouts/            # Test layout JSON files
   themes/             # Test theme JSON files
+  output/             # Test output (auto-created)
   batch.json          # Test batch configuration
   assets/             # Test images and text files
 palettes/             # Adobe Color CSS files (source for themes)
 scripts/              # Utility scripts
-output/               # Generated PNG files
 ```
 
 ## Running
@@ -37,7 +43,7 @@ python PrintLayoutDesigner.py test/batch.json       # Run test batch
 
 ## Configuration
 
-- **batch.json**: Specifies layout/theme pairs with full paths, rendering mode, and asset paths
+- **batch.json**: Specifies layout/theme pairs (filenames only), rendering mode, and asset paths
 - **layouts/*.json**: Edit to modify geometry (positions, dimensions, border widths)
 - **themes/*.json**: Edit to modify colors
 
