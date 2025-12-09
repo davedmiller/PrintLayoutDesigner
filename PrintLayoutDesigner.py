@@ -1193,4 +1193,4 @@ if __name__ == "__main__":
     print("Done!")
 
     # Open index in browser
-    webbrowser.open('file://' + index_path)
+    webbrowser.open('file://' + os.path.abspath(index_path))
