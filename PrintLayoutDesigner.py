@@ -9,7 +9,7 @@ import sys
 import textwrap
 
 # --- CONFIGURATION ---
-VERSION = "3.0.0"
+VERSION = "4.0.0"
 
 # Canvas drawing size
 CANVAS_W = 18
