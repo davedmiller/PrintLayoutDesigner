@@ -181,7 +181,7 @@ def generate_box_css(x, y, w, h, style, paper_h):
 
 def generate_html_output(batch_entry, layout, front_theme, back_theme,
                          image_path, text_content, note_content,
-                         layout_name, output_dir):
+                         layout_name, output_dir, front_png=None, back_png=None):
     """Generate HTML file for print mode output."""
 
     paper_w = layout['paper_size']['width']
@@ -303,6 +303,26 @@ def generate_html_output(batch_entry, layout, front_theme, back_theme,
         p:last-child {{
             margin-bottom: 0;
         }}
+        .blueprint {{
+            margin: 20px auto;
+            text-align: center;
+            max-width: 100%;
+        }}
+        .blueprint h3 {{
+            margin: 10px 0;
+            color: #666;
+            font-size: 14px;
+        }}
+        .blueprint img {{
+            max-width: 100%;
+            height: auto;
+            box-shadow: 0 0 10px rgba(0,0,0,0.2);
+        }}
+        @media print {{
+            .blueprint {{
+                display: none;
+            }}
+        }}
     </style>
 </head>
 <body>
@@ -314,12 +334,18 @@ def generate_html_output(batch_entry, layout, front_theme, back_theme,
         {caption_block_html}
     </div>
 
+    <!-- Front Blueprint -->
+    {f'<div class="blueprint"><h3>Front Blueprint</h3><img src="{front_png}" alt="Front Blueprint"></div>' if front_png else ''}
+
     <!-- Back Page -->
     <div class="page" style="background: {back_paper_bg};">
         <div class="note-box" style="{note_css} display: flex; flex-direction: column; justify-content: {back_css['align_items']}; overflow: hidden; padding: 0.1in;">
             <div style="text-align: {back_css['text_align']}; font-family: {back_css['font_family']}; font-size: {back_css['font_size']}pt; color: {back_font_color or '#000000'};">{note_html}</div>
         </div>
     </div>
+
+    <!-- Back Blueprint -->
+    {f'<div class="blueprint"><h3>Back Blueprint</h3><img src="{back_png}" alt="Back Blueprint"></div>' if back_png else ''}
 </body>
 </html>
 '''
@@ -1183,7 +1209,9 @@ if __name__ == "__main__":
             text_content=text_content,
             note_content=note_content,
             layout_name=f"{layout_name}_{front_theme_name}",
-            output_dir=output_dir
+            output_dir=output_dir,
+            front_png=front_filename,
+            back_png=back_filename
         )
         html_files.append(html_path)
 
