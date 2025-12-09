@@ -2,7 +2,7 @@
   "mode": "design",
   "image_path_landscape": "/Users/dave/Documents/ClaudeApps/PrintLayoutDesigner/test/assets/flower.tif",
   "image_path_portrait": "/Users/dave/Documents/ClaudeApps/PrintLayoutDesigner/test/assets/dae.tif",
-  "text_path": "/Users/dave/Documents/ClaudeApps/PrintLayoutDesigner/test/assets/lorem ipsum.md",
+  "text_path": "/Users/dave/Documents/ClaudeApps/PrintLayoutDesigner/test/assets/caption.md",
   "personal_note_path": "/Users/dave/Documents/ClaudeApps/PrintLayoutDesigner/test/assets/personal note.md",
   "batch": [
     {
