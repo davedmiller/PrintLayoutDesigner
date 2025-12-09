@@ -1,0 +1,45 @@
+{
+  "name": "06_Footer_Port_8-5x11",
+  "title": "Footer - Portrait",
+  "paper_size": {
+    "width": 8.5,
+    "height": 11
+  },
+  "front": {
+    "img_dims": {
+      "width": 4,
+      "height": 6
+    },
+    "img_pos": {
+      "left": 2.25,
+      "top": 2
+    },
+    "caption_dims": {
+      "width": 7.5,
+      "height": 1
+    },
+    "caption_pos": {
+      "left": 0.5,
+      "top": 9.0
+    },
+    "special": null,
+    "gutter": null,
+    "border_widths": {
+      "paper": 1.0,
+      "img": 0.25,
+      "caption": null
+    }
+  },
+  "back": {
+    "note_dims": {
+      "width": 6,
+      "height": 9
+    },
+    "note_pos": "centered",
+    "border_widths": {
+      "paper": null,
+      "note": null
+    }
+  },
+  "notes": "Layout: Footer\nPaper: 8-5x11\nImg: Optical Center\nText: Wide Footer (7.5\") anchored 1\" from bottom."
+}

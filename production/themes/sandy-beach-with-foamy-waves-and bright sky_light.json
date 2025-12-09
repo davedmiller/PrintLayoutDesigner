@@ -1,0 +1,23 @@
+{
+  "name": "sandy-beach-with-foamy-waves-and bright sky",
+  "source": "adobe-color",
+  "mode": "light",
+  "colors": {
+    "background": "#ACE5F2",
+    "base": "#1F92BF",
+    "secondary": "#D9B88F",
+    "accent": "#177FBF",
+    "text": "#0F5FA6"
+  },
+  "styles": {
+    "paper_background": "background",
+    "paper_border": "base",
+    "img_background": "secondary",
+    "img_border": "accent",
+    "caption_background": "secondary",
+    "caption_border": "accent",
+    "note_background": "secondary",
+    "note_border": "accent",
+    "font_color": "text"
+  }
+}

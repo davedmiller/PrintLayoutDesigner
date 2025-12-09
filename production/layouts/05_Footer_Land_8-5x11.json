@@ -1,0 +1,45 @@
+{
+  "name": "05_Footer_Land_8-5x11",
+  "title": "Footer - Landscape",
+  "paper_size": {
+    "width": 8.5,
+    "height": 11
+  },
+  "front": {
+    "img_dims": {
+      "width": 6,
+      "height": 4
+    },
+    "img_pos": {
+      "left": 1.25,
+      "top": 2.5
+    },
+    "caption_dims": {
+      "width": 7.5,
+      "height": 1
+    },
+    "caption_pos": {
+      "left": 0.5,
+      "top": 9.0
+    },
+    "special": null,
+    "gutter": null,
+    "border_widths": {
+      "paper": 0.375,
+      "img": null,
+      "caption": 0.0625
+    }
+  },
+  "back": {
+    "note_dims": {
+      "width": 6,
+      "height": 9
+    },
+    "note_pos": "centered",
+    "border_widths": {
+      "paper": 0.375,
+      "note": 0.0625
+    }
+  },
+  "notes": "Layout: Footer\nPaper: 8-5x11\nImg: Optical Center\nText: Wide Footer (7.5\") anchored 1\" from bottom."
+}

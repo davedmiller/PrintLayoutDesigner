@@ -1,0 +1,23 @@
+{
+  "name": "Christmas",
+  "source": "adobe-color",
+  "mode": "light",
+  "colors": {
+    "background": "#F2F2F2",
+    "base": "#A69F3C",
+    "secondary": "#F22E2E",
+    "accent": "#D93829",
+    "text": "#537334"
+  },
+  "styles": {
+    "paper_background": "background",
+    "paper_border": "base",
+    "img_background": "secondary",
+    "img_border": "accent",
+    "caption_background": "secondary",
+    "caption_border": "accent",
+    "note_background": "secondary",
+    "note_border": "accent",
+    "font_color": "text"
+  }
+}

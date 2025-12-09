@@ -1,0 +1,45 @@
+{
+  "name": "19_Footer_Land_11x14",
+  "title": "Footer - Landscape",
+  "paper_size": {
+    "width": 11,
+    "height": 14
+  },
+  "front": {
+    "img_dims": {
+      "width": 6,
+      "height": 4
+    },
+    "img_pos": {
+      "left": 2.5,
+      "top": 3.5
+    },
+    "caption_dims": {
+      "width": 7,
+      "height": 1
+    },
+    "caption_pos": {
+      "left": 2.0,
+      "top": 11.5
+    },
+    "special": null,
+    "gutter": null,
+    "border_widths": {
+      "paper": 0.5,
+      "img": null,
+      "caption": null
+    }
+  },
+  "back": {
+    "note_dims": {
+      "width": 7,
+      "height": 10
+    },
+    "note_pos": "centered",
+    "border_widths": {
+      "paper": null,
+      "note": null
+    }
+  },
+  "notes": "Layout: Footer\nPaper: 11x14\nImg: Optical Center\nText: Wide Footer (7\") anchored 1.5\" from bottom."
+}

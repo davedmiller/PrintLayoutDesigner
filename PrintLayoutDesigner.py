@@ -27,18 +27,24 @@ TITLE_BLOCK_H = 2.5  # Title block height
 
 # --- THEME AND LAYOUT LOADING ---
 
-def load_theme(theme_name):
-    """Load a theme from themes/{theme_name}.json"""
-    theme_path = os.path.join('themes', f'{theme_name}.json')
-    with open(theme_path, 'r') as f:
-        return json.load(f)
+def load_theme(theme_path):
+    """Load a theme from the given path."""
+    try:
+        with open(theme_path, 'r') as f:
+            return json.load(f)
+    except FileNotFoundError:
+        print(f"Error: Theme not found: {theme_path}")
+        sys.exit(1)
 
 
-def load_layout(layout_name):
-    """Load a layout from layouts/{layout_name}.json"""
-    layout_path = os.path.join('layouts', f'{layout_name}.json')
-    with open(layout_path, 'r') as f:
-        return json.load(f)
+def load_layout(layout_path):
+    """Load a layout from the given path."""
+    try:
+        with open(layout_path, 'r') as f:
+            return json.load(f)
+    except FileNotFoundError:
+        print(f"Error: Layout not found: {layout_path}")
+        sys.exit(1)
 
 
 def resolve_color(theme, style_key):
@@ -108,13 +114,17 @@ def build_back_styles(layout, theme):
     return paper_style, note_style, font_color
 
 
-def load_batch(filename='batch.json'):
+def load_batch(batch_path):
     """Load batch configuration from JSON file.
 
     Returns (batch_entries, mode, image_path_landscape, image_path_portrait, text_path, personal_note_path).
     """
-    with open(filename, 'r') as f:
-        data = json.load(f)
+    try:
+        with open(batch_path, 'r') as f:
+            data = json.load(f)
+    except FileNotFoundError:
+        print(f"Error: Batch file not found: {batch_path}")
+        sys.exit(1)
 
     return (
         data.get('batch', []),
@@ -680,28 +690,28 @@ def draw_back(filename, title, paper_w, paper_h, paper_style, note_style,
 if __name__ == "__main__":
     print(f"PrintLayoutDesigner v{VERSION}")
 
-    if not os.path.exists('batch.json'):
-        print("Error: batch.json not found.")
-        print("Create batch.json with layout and theme assignments.")
-        sys.exit(1)
-
-    batch_entries, mode, image_path_landscape, image_path_portrait, text_path, personal_note_path = load_batch()
+    batch_path = sys.argv[1] if len(sys.argv) > 1 else 'production/batch.json'
+    batch_entries, mode, image_path_landscape, image_path_portrait, text_path, personal_note_path = load_batch(batch_path)
 
     if not batch_entries:
-        print("Error: No entries in batch.json batch list.")
-        print("Add entries like: {\"layout\": \"01_ClassicMuseum_Land_8-5x11\", \"front_theme\": \"Christmas_light\", \"back_theme\": \"Christmas_dark\"}")
+        print(f"Error: No entries in {batch_path} batch list.")
         sys.exit(1)
 
     print(f"Generating {len(batch_entries)} batch entries (front + back) in {mode} mode...")
     for entry in batch_entries:
-        layout_name = entry['layout']
-        front_theme_name = entry['front_theme']
-        back_theme_name = entry['back_theme']
+        layout_path = entry['layout']
+        front_theme_path = entry['front_theme']
+        back_theme_path = entry['back_theme']
+
+        # Extract names from paths for filenames (remove directory and .json extension)
+        layout_name = os.path.splitext(os.path.basename(layout_path))[0]
+        front_theme_name = os.path.splitext(os.path.basename(front_theme_path))[0]
+        back_theme_name = os.path.splitext(os.path.basename(back_theme_path))[0]
 
         # Load layout and themes
-        layout = load_layout(layout_name)
-        front_theme = load_theme(front_theme_name)
-        back_theme = load_theme(back_theme_name)
+        layout = load_layout(layout_path)
+        front_theme = load_theme(front_theme_path)
+        back_theme = load_theme(back_theme_path)
 
         # Build styles from theme + layout
         paper_style, img_style, caption_style, font_color = build_front_styles(layout, front_theme)
@@ -711,7 +721,7 @@ if __name__ == "__main__":
         front = layout.get('front', {})
         back = layout.get('back', {})
 
-        # Generate filenames: number_layout_size_side_theme.png
+        # Generate filenames: layout_side_theme.png
         front_filename = f"{layout_name}_front_{front_theme_name}.png"
         back_filename = f"{layout_name}_back_{back_theme_name}.png"
 

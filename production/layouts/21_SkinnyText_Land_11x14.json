@@ -1,0 +1,45 @@
+{
+  "name": "21_SkinnyText_Land_11x14",
+  "title": "Skinny Text - Landscape",
+  "paper_size": {
+    "width": 11,
+    "height": 14
+  },
+  "front": {
+    "img_dims": {
+      "width": 6,
+      "height": 4
+    },
+    "img_pos": {
+      "left": 2.5,
+      "top": 3
+    },
+    "caption_dims": {
+      "width": 6,
+      "height": 2
+    },
+    "caption_pos": {
+      "left": 2.5,
+      "top": 8.0
+    },
+    "special": "double_col",
+    "gutter": 0.5,
+    "border_widths": {
+      "paper": 0.5,
+      "img": 0.1875,
+      "caption": 0.1875
+    }
+  },
+  "back": {
+    "note_dims": {
+      "width": 7,
+      "height": 10
+    },
+    "note_pos": "centered",
+    "border_widths": {
+      "paper": 0.375,
+      "note": 0.0625
+    }
+  },
+  "notes": "Layout: Skinny Text\nPaper: 11x14\nImg: Centered Top\nTxt: Two 2.75\" columns with 0.5\" gutter."
+}

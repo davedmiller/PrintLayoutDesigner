@@ -1,0 +1,23 @@
+{
+  "name": "Blue Denim Jeans",
+  "source": "adobe-color",
+  "mode": "dark",
+  "colors": {
+    "background": "#122A40",
+    "base": "#30588C",
+    "secondary": "#1B3659",
+    "accent": "#37648C",
+    "text": "#639CBF"
+  },
+  "styles": {
+    "paper_background": "background",
+    "paper_border": "base",
+    "img_background": "secondary",
+    "img_border": "accent",
+    "caption_background": "secondary",
+    "caption_border": "accent",
+    "note_background": "secondary",
+    "note_border": "accent",
+    "font_color": "text"
+  }
+}

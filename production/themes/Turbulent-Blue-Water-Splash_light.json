@@ -1,0 +1,23 @@
+{
+  "name": "Turbulent-Blue-Water-Splash",
+  "source": "adobe-color",
+  "mode": "light",
+  "colors": {
+    "background": "#F1E4F2",
+    "base": "#3B6D8C",
+    "secondary": "#B0C1D9",
+    "accent": "#688EA6",
+    "text": "#306073"
+  },
+  "styles": {
+    "paper_background": "background",
+    "paper_border": "base",
+    "img_background": "secondary",
+    "img_border": "accent",
+    "caption_background": "secondary",
+    "caption_border": "accent",
+    "note_background": "secondary",
+    "note_border": "accent",
+    "font_color": "text"
+  }
+}

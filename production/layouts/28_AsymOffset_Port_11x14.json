@@ -1,0 +1,45 @@
+{
+  "name": "28_AsymOffset_Port_11x14",
+  "title": "Asym Offset - Portrait",
+  "paper_size": {
+    "width": 11,
+    "height": 14
+  },
+  "front": {
+    "img_dims": {
+      "width": 4,
+      "height": 6
+    },
+    "img_pos": {
+      "left": 4.5,
+      "top": 4.0
+    },
+    "caption_dims": {
+      "width": 4,
+      "height": 2.5
+    },
+    "caption_pos": {
+      "left": 4.5,
+      "top": 10.5
+    },
+    "special": null,
+    "gutter": null,
+    "border_widths": {
+      "paper": 0.625,
+      "img": 0.1875,
+      "caption": 0.1875
+    }
+  },
+  "back": {
+    "note_dims": {
+      "width": 7,
+      "height": 10
+    },
+    "note_pos": "centered",
+    "border_widths": {
+      "paper": null,
+      "note": null
+    }
+  },
+  "notes": "Layout: Asym Offset\nPaper: 11x14\nImg: Pushed Right (2.5\" margin)\nTxt: Flush Left with Image."
+}

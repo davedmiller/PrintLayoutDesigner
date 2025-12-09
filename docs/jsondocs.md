@@ -1,9 +1,22 @@
 # JSON Configuration Documentation
 
 PrintLayoutDesigner uses three types of JSON files:
-- **batch.json** - Controls what gets generated (required)
+- **batch.json** - Controls what gets generated (in `production/` or `test/`)
 - **layouts/*.json** - Layout geometry definitions
 - **themes/*.json** - Color themes
+
+## Directory Structure
+
+```
+production/
+  layouts/       # Production layouts
+  themes/        # Production themes
+  batch.json     # Production batch file
+test/
+  layouts/       # Test layouts
+  themes/        # Test themes
+  batch.json     # Test batch file
+```
 
 ## batch.json
 
@@ -24,9 +37,9 @@ Controls which layouts to generate and with which themes.
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| `layout` | string | Yes | Layout name (matches filename in `layouts/` without `.json`) |
-| `front_theme` | string | Yes | Theme name for front side (matches filename in `themes/` without `.json`) |
-| `back_theme` | string | Yes | Theme name for back side |
+| `layout` | string | Yes | Full path to layout file (e.g., `"production/layouts/01_ClassicMuseum.json"`) |
+| `front_theme` | string | Yes | Full path to theme file for front side |
+| `back_theme` | string | Yes | Full path to theme file for back side |
 
 ### Example batch.json
 
@@ -39,9 +52,9 @@ Controls which layouts to generate and with which themes.
   "personal_note_path": "/path/to/note.md",
   "batch": [
     {
-      "layout": "01_ClassicMuseum_Land_8-5x11",
-      "front_theme": "Christmas_light",
-      "back_theme": "Christmas_dark"
+      "layout": "production/layouts/01_ClassicMuseum_Land_8-5x11.json",
+      "front_theme": "production/themes/Christmas_light.json",
+      "back_theme": "production/themes/Christmas_dark.json"
     }
   ]
 }

@@ -1,0 +1,45 @@
+{
+  "name": "08_SkinnyText_Port_8-5x11",
+  "title": "Skinny Text - Portrait",
+  "paper_size": {
+    "width": 8.5,
+    "height": 11
+  },
+  "front": {
+    "img_dims": {
+      "width": 4,
+      "height": 6
+    },
+    "img_pos": {
+      "left": 0.75,
+      "top": 2.5
+    },
+    "caption_dims": {
+      "width": 2.5,
+      "height": 6
+    },
+    "caption_pos": {
+      "left": 5.25,
+      "top": 2.5
+    },
+    "special": null,
+    "gutter": null,
+    "border_widths": {
+      "paper": 0.5,
+      "img": 0.1875,
+      "caption": 0.1875
+    }
+  },
+  "back": {
+    "note_dims": {
+      "width": 6,
+      "height": 9
+    },
+    "note_pos": "centered",
+    "border_widths": {
+      "paper": null,
+      "note": null
+    }
+  },
+  "notes": "Layout: Skinny Text\nPaper: 8-5x11\nImg: Left (0.75\" Margin)\nTxt: Right Column (2.5\" Wide)\nMagazine spread look."
+}
