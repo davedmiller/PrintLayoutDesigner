@@ -910,6 +910,162 @@ def draw_back(filename, title, paper_w, paper_h, paper_style, note_style,
     plt.close()
     print(f"Generated: {output_path}")
 
+def generate_index_html(html_files, output_dir):
+    """Generate an index.html with navigation to all layout HTML files."""
+    # Extract just filenames for display
+    entries = []
+    for path in html_files:
+        filename = os.path.basename(path)
+        name = os.path.splitext(filename)[0]
+        entries.append({'filename': filename, 'name': name})
+
+    nav_items = '\n'.join([
+        f'<a href="{e["filename"]}" target="preview" class="nav-item" data-index="{i}">{e["name"]}</a>'
+        for i, e in enumerate(entries)
+    ])
+
+    html = f'''<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Print Layout Designer - Index</title>
+    <style>
+        * {{ box-sizing: border-box; margin: 0; padding: 0; }}
+        body {{
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }}
+        .sidebar {{
+            width: 300px;
+            background: #2c3e50;
+            color: white;
+            overflow-y: auto;
+            flex-shrink: 0;
+        }}
+        .sidebar h1 {{
+            padding: 20px;
+            font-size: 16px;
+            background: #1a252f;
+            position: sticky;
+            top: 0;
+        }}
+        .nav-item {{
+            display: block;
+            padding: 12px 20px;
+            color: #ecf0f1;
+            text-decoration: none;
+            border-bottom: 1px solid #34495e;
+            font-size: 13px;
+            transition: background 0.2s;
+        }}
+        .nav-item:hover {{
+            background: #34495e;
+        }}
+        .nav-item.active {{
+            background: #3498db;
+        }}
+        .preview-container {{
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #ecf0f1;
+        }}
+        .toolbar {{
+            padding: 10px 20px;
+            background: white;
+            border-bottom: 1px solid #ddd;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }}
+        .toolbar button {{
+            padding: 8px 16px;
+            border: 1px solid #3498db;
+            background: white;
+            color: #3498db;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }}
+        .toolbar button:hover {{
+            background: #3498db;
+            color: white;
+        }}
+        .toolbar span {{
+            margin-left: auto;
+            color: #666;
+            font-size: 14px;
+        }}
+        iframe {{
+            flex: 1;
+            border: none;
+            background: white;
+        }}
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <h1>Layouts ({len(entries)})</h1>
+        {nav_items}
+    </div>
+    <div class="preview-container">
+        <div class="toolbar">
+            <button onclick="prev()">← Previous</button>
+            <button onclick="next()">Next →</button>
+            <span id="counter">1 / {len(entries)}</span>
+        </div>
+        <iframe name="preview" id="preview"></iframe>
+    </div>
+    <script>
+        const items = document.querySelectorAll('.nav-item');
+        let current = 0;
+
+        function showItem(index) {{
+            if (index < 0) index = items.length - 1;
+            if (index >= items.length) index = 0;
+            current = index;
+
+            items.forEach(item => item.classList.remove('active'));
+            items[current].classList.add('active');
+            items[current].click();
+            items[current].scrollIntoView({{ block: 'nearest' }});
+            document.getElementById('counter').textContent = (current + 1) + ' / ' + items.length;
+        }}
+
+        function prev() {{ showItem(current - 1); }}
+        function next() {{ showItem(current + 1); }}
+
+        document.addEventListener('keydown', (e) => {{
+            if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {{ prev(); e.preventDefault(); }}
+            if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {{ next(); e.preventDefault(); }}
+        }});
+
+        items.forEach((item, i) => {{
+            item.addEventListener('click', () => {{
+                current = i;
+                items.forEach(it => it.classList.remove('active'));
+                item.classList.add('active');
+                document.getElementById('counter').textContent = (current + 1) + ' / ' + items.length;
+            }});
+        }});
+
+        // Load first item
+        if (items.length > 0) showItem(0);
+    </script>
+</body>
+</html>
+'''
+
+    index_path = os.path.join(output_dir, 'index.html')
+    with open(index_path, 'w', encoding='utf-8') as f:
+        f.write(html)
+
+    print(f"Generated: {index_path}")
+    return index_path
+
+
 # Run Generator
 if __name__ == "__main__":
     print(f"PrintLayoutDesigner v{VERSION}")
@@ -928,7 +1084,7 @@ if __name__ == "__main__":
         print(f"Error: No entries in {batch_path} batch list.")
         sys.exit(1)
 
-    # Load text content for HTML mode
+    # Load text content for HTML output
     text_content = None
     note_content = None
     if text_path and os.path.exists(text_path):
@@ -938,8 +1094,7 @@ if __name__ == "__main__":
         with open(personal_note_path, 'r') as f:
             note_content = f.read().strip()
 
-    output_format = "html" if mode == "print" else "png"
-    print(f"Generating {len(batch_entries)} batch entries in {mode} mode ({output_format} output)...")
+    print(f"Generating {len(batch_entries)} batch entries (PNG + HTML)...")
     print(f"Output directory: {output_dir}")
 
     html_files = []
@@ -959,94 +1114,83 @@ if __name__ == "__main__":
         front_theme = load_theme(front_theme_path)
         back_theme = load_theme(back_theme_path)
 
-        if mode == "print":
-            # HTML output for print mode
-            # Determine which image to use based on layout orientation
-            front = layout.get('front', {})
-            img_w = front['img_dims']['width']
-            img_h = front['img_dims']['height']
-            image_path = image_path_landscape if img_w > img_h else image_path_portrait
+        # Build styles from theme + layout
+        paper_style, img_style, caption_style, font_color = build_front_styles(layout, front_theme)
+        back_paper_style, back_note_style, back_font_color = build_back_styles(layout, back_theme)
 
-            html_path = generate_html_output(
-                batch_entry=entry,
-                layout=layout,
-                front_theme=front_theme,
-                back_theme=back_theme,
-                image_path=image_path,
-                text_content=text_content,
-                note_content=note_content,
-                layout_name=f"{layout_name}_{front_theme_name}",
-                output_dir=output_dir
-            )
-            html_files.append(html_path)
-        else:
-            # PNG output for design mode
-            # Build styles from theme + layout
-            paper_style, img_style, caption_style, font_color = build_front_styles(layout, front_theme)
-            back_paper_style, back_note_style, back_font_color = build_back_styles(layout, back_theme)
+        # Extract geometry from layout
+        front = layout.get('front', {})
+        back = layout.get('back', {})
 
-            # Extract geometry from layout
-            front = layout.get('front', {})
-            back = layout.get('back', {})
+        # --- Generate PNG (design blueprints) ---
+        front_filename = f"{layout_name}_front_{front_theme_name}.png"
+        back_filename = f"{layout_name}_back_{back_theme_name}.png"
 
-            # Generate filenames: layout_side_theme.png
-            front_filename = f"{layout_name}_front_{front_theme_name}.png"
-            back_filename = f"{layout_name}_back_{back_theme_name}.png"
+        draw_canvas(
+            filename=front_filename,
+            title=layout.get('title', layout_name),
+            layout_type="Standard",
+            orientation="Portrait",
+            paper_w=layout['paper_size']['width'],
+            paper_h=layout['paper_size']['height'],
+            paper_style=paper_style,
+            img_style=img_style,
+            caption_style=caption_style,
+            img_w=front['img_dims']['width'],
+            img_h=front['img_dims']['height'],
+            img_margins={'left': front['img_pos']['left'], 'top': front['img_pos']['top']},
+            caption_dims=[front['caption_dims']['width'], front['caption_dims']['height']],
+            caption_pos=front['caption_pos'],
+            notes=layout.get('notes', ''),
+            special_mode=front.get('special'),
+            gutter=front.get('gutter'),
+            mode="design",
+            image_path_landscape=image_path_landscape,
+            image_path_portrait=image_path_portrait,
+            text_path=text_path,
+            font_color=font_color,
+            theme_name=front_theme_name,
+            output_dir=output_dir
+        )
 
-            # Generate front side
-            draw_canvas(
-                filename=front_filename,
-                title=layout.get('title', layout_name),
-                layout_type="Standard",
-                orientation="Portrait",
-                paper_w=layout['paper_size']['width'],
-                paper_h=layout['paper_size']['height'],
-                paper_style=paper_style,
-                img_style=img_style,
-                caption_style=caption_style,
-                img_w=front['img_dims']['width'],
-                img_h=front['img_dims']['height'],
-                img_margins={'left': front['img_pos']['left'], 'top': front['img_pos']['top']},
-                caption_dims=[front['caption_dims']['width'], front['caption_dims']['height']],
-                caption_pos=front['caption_pos'],
-                notes=layout.get('notes', ''),
-                special_mode=front.get('special'),
-                gutter=front.get('gutter'),
-                mode=mode,
-                image_path_landscape=image_path_landscape,
-                image_path_portrait=image_path_portrait,
-                text_path=text_path,
-                font_color=font_color,
-                theme_name=front_theme_name,
-                output_dir=output_dir
-            )
+        note_dims = back.get('note_dims', {'width': 6, 'height': 9})
+        draw_back(
+            filename=back_filename,
+            title=layout.get('title', layout_name),
+            paper_w=layout['paper_size']['width'],
+            paper_h=layout['paper_size']['height'],
+            paper_style=back_paper_style,
+            note_style=back_note_style,
+            note_dims=[note_dims['width'], note_dims['height']],
+            note_font_color=back_font_color,
+            mode="design",
+            personal_note_path=personal_note_path,
+            theme_name=back_theme_name,
+            output_dir=output_dir
+        )
 
-            # Generate back side
-            note_dims = back.get('note_dims', {'width': 6, 'height': 9})
-            draw_back(
-                filename=back_filename,
-                title=layout.get('title', layout_name),
-                paper_w=layout['paper_size']['width'],
-                paper_h=layout['paper_size']['height'],
-                paper_style=back_paper_style,
-                note_style=back_note_style,
-                note_dims=[note_dims['width'], note_dims['height']],
-                note_font_color=back_font_color,
-                mode=mode,
-                personal_note_path=personal_note_path,
-                theme_name=back_theme_name,
-                output_dir=output_dir
-            )
+        # --- Generate HTML (print preview) ---
+        img_w = front['img_dims']['width']
+        img_h = front['img_dims']['height']
+        image_path = image_path_landscape if img_w > img_h else image_path_portrait
+
+        html_path = generate_html_output(
+            batch_entry=entry,
+            layout=layout,
+            front_theme=front_theme,
+            back_theme=back_theme,
+            image_path=image_path,
+            text_content=text_content,
+            note_content=note_content,
+            layout_name=f"{layout_name}_{front_theme_name}",
+            output_dir=output_dir
+        )
+        html_files.append(html_path)
+
+    # Generate index page
+    index_path = generate_index_html(html_files, output_dir)
 
     print("Done!")
 
-    # Open outputs in appropriate viewer
-    if mode == "print":
-        # Open first HTML file in browser
-        if html_files:
-            webbrowser.open('file://' + html_files[0])
-    else:
-        # Open all PNGs in Preview (alphabetically sorted)
-        png_files = sorted(glob.glob(os.path.join(output_dir, '*.png')))
-        if png_files:
-            subprocess.run(['open', '-a', 'Preview'] + png_files)
+    # Open index in browser
+    webbrowser.open('file://' + index_path)
