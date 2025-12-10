@@ -7,6 +7,7 @@ import glob
 import json
 import markdown
 import os
+from pathlib import Path
 import shutil
 import subprocess
 import sys
@@ -40,8 +41,7 @@ def load_theme(theme_path):
         with open(theme_path, 'r') as f:
             return json.load(f)
     except FileNotFoundError:
-        print(f"Error: Theme not found: {theme_path}")
-        sys.exit(1)
+        raise FileNotFoundError(f"Theme not found: {theme_path}")
 
 
 def load_layout(layout_path):
@@ -50,8 +50,294 @@ def load_layout(layout_path):
         with open(layout_path, 'r') as f:
             return json.load(f)
     except FileNotFoundError:
-        print(f"Error: Layout not found: {layout_path}")
-        sys.exit(1)
+        raise FileNotFoundError(f"Layout not found: {layout_path}")
+
+
+# --- API: DISCOVERY FUNCTIONS ---
+
+def list_layouts(base_dir):
+    """Return list of available layouts with metadata.
+
+    Args:
+        base_dir: Path to directory containing 'layouts' subdirectory
+
+    Returns:
+        List of dicts with 'name', 'title', 'paper_size' keys
+    """
+    layouts_dir = Path(base_dir) / 'layouts'
+    result = []
+    for f in sorted(layouts_dir.glob('*.json')):
+        data = json.loads(f.read_text())
+        result.append({
+            'name': f.stem,
+            'title': data.get('title', f.stem),
+            'paper_size': data.get('paper_size', {}),
+        })
+    return result
+
+
+def list_themes(base_dir):
+    """Return list of available themes with metadata.
+
+    Args:
+        base_dir: Path to directory containing 'themes' subdirectory
+
+    Returns:
+        List of dicts with 'name', 'mode' keys
+    """
+    themes_dir = Path(base_dir) / 'themes'
+    result = []
+    for f in sorted(themes_dir.glob('*.json')):
+        data = json.loads(f.read_text())
+        result.append({
+            'name': f.stem,
+            'mode': data.get('mode', 'unknown'),
+        })
+    return result
+
+
+# --- API: LAYOUT SPEC ---
+
+def get_layout_spec(layout_name, front_theme_name, back_theme_name, base_dir):
+    """Return structured dict with geometry and colors for a layout.
+
+    Args:
+        layout_name: Name of layout file (without .json extension)
+        front_theme_name: Name of front theme file (without .json extension)
+        back_theme_name: Name of back theme file (without .json extension)
+        base_dir: Path to directory containing 'layouts' and 'themes' subdirectories
+
+    Returns:
+        Dict with paper, front, back, and text specifications
+    """
+    base = Path(base_dir)
+    layout = load_layout(base / 'layouts' / f'{layout_name}.json')
+    front_theme = load_theme(base / 'themes' / f'{front_theme_name}.json')
+    back_theme = load_theme(base / 'themes' / f'{back_theme_name}.json')
+
+    front = layout.get('front', {})
+    back = layout.get('back', {})
+    front_borders = front.get('border_widths', {})
+    back_borders = back.get('border_widths', {})
+    front_text = front.get('text_style', {})
+    back_text = back.get('text_style', {})
+
+    def get_color(theme, style_key):
+        color_role = theme['styles'].get(style_key)
+        return theme['colors'].get(color_role) if color_role else None
+
+    return {
+        'paper': layout.get('paper_size', {'width': 8.5, 'height': 11}),
+        'front': {
+            'image': {
+                **front.get('img_dims', {}),
+                **front.get('img_pos', {}),
+                'border_width': front_borders.get('img', 0),
+            },
+            'caption': {
+                **front.get('caption_dims', {}),
+                **front.get('caption_pos', {}),
+                'border_width': front_borders.get('caption', 0),
+            },
+            'paper_border_width': front_borders.get('paper', 0),
+            'special': front.get('special'),
+            'gutter': front.get('gutter'),
+            'colors': {
+                'paper_bg': get_color(front_theme, 'paper_background'),
+                'paper_border': get_color(front_theme, 'paper_border'),
+                'image_bg': get_color(front_theme, 'img_background'),
+                'image_border': get_color(front_theme, 'img_border'),
+                'caption_bg': get_color(front_theme, 'caption_background'),
+                'caption_border': get_color(front_theme, 'caption_border'),
+                'font': get_color(front_theme, 'font_color'),
+            },
+            'text': {
+                'align_h': front_text.get('align_h', 'left'),
+                'align_v': front_text.get('align_v', 'top'),
+                'font': front_text.get('font', 'Georgia, serif'),
+                'size': front_text.get('size', 10),
+            },
+        },
+        'back': {
+            'note': {
+                **back.get('note_dims', {}),
+                'pos': back.get('note_pos', 'centered'),
+                'border_width': back_borders.get('note', 0),
+            },
+            'paper_border_width': back_borders.get('paper', 0),
+            'colors': {
+                'paper_bg': get_color(back_theme, 'paper_background'),
+                'paper_border': get_color(back_theme, 'paper_border'),
+                'note_bg': get_color(back_theme, 'note_background'),
+                'note_border': get_color(back_theme, 'note_border'),
+                'font': get_color(back_theme, 'font_color'),
+            },
+            'text': {
+                'align_h': back_text.get('align_h', 'left'),
+                'align_v': back_text.get('align_v', 'top'),
+                'font': back_text.get('font', 'Georgia, serif'),
+                'size': back_text.get('size', 10),
+            },
+        },
+    }
+
+
+# --- API: HTML TEMPLATE ---
+
+def get_html_template(layout_name, front_theme_name, back_theme_name, base_dir):
+    """Return HTML template with placeholders for content injection.
+
+    Args:
+        layout_name: Name of layout file (without .json extension)
+        front_theme_name: Name of front theme file (without .json extension)
+        back_theme_name: Name of back theme file (without .json extension)
+        base_dir: Path to directory containing 'layouts' and 'themes' subdirectories
+
+    Returns:
+        HTML string with placeholders:
+        - {{IMAGE}} - image element placeholder
+        - {{CAPTION}} - caption HTML content placeholder
+        - {{NOTE}} - note HTML content placeholder
+        - {{FONT_FAMILY}} - font-family CSS value placeholder
+    """
+    base = Path(base_dir)
+    layout = load_layout(base / 'layouts' / f'{layout_name}.json')
+    front_theme = load_theme(base / 'themes' / f'{front_theme_name}.json')
+    back_theme = load_theme(base / 'themes' / f'{back_theme_name}.json')
+
+    paper_w = layout['paper_size']['width']
+    paper_h = layout['paper_size']['height']
+    front = layout.get('front', {})
+    back = layout.get('back', {})
+
+    # Build styles
+    paper_style, img_style, caption_style, font_color = build_front_styles(layout, front_theme)
+    back_paper_style, back_note_style, back_font_color = build_back_styles(layout, back_theme)
+
+    # Get text styles
+    front_text_style = front.get('text_style', {})
+    back_text_style = back.get('text_style', {})
+    front_css = get_css_text_alignment(front_text_style)
+    back_css = get_css_text_alignment(back_text_style)
+
+    # Image position and size
+    img_w = front['img_dims']['width']
+    img_h = front['img_dims']['height']
+    img_left = front['img_pos']['left']
+    img_top_margin = front['img_pos']['top']
+    img_y = paper_h - img_top_margin - img_h
+
+    # Caption position and size
+    caption_w = front['caption_dims']['width']
+    caption_h = front['caption_dims']['height']
+    caption_left = front['caption_pos']['left']
+    caption_top_margin = front['caption_pos']['top']
+    caption_y = paper_h - caption_top_margin - caption_h
+
+    # Note position and size
+    note_dims = back.get('note_dims', {'width': 6, 'height': 9})
+    note_w = note_dims['width']
+    note_h = note_dims['height']
+    note_left = (paper_w - note_w) / 2
+    note_y = (paper_h - note_h) / 2
+
+    # Generate CSS
+    front_paper_bg = paper_style.get('background', '#FFFFFF') if paper_style else '#FFFFFF'
+    back_paper_bg = back_paper_style.get('background', '#FFFFFF') if back_paper_style else '#FFFFFF'
+
+    front_paper_border = paper_style.get('border') if paper_style else None
+    back_paper_border = back_paper_style.get('border') if back_paper_style else None
+
+    def get_paper_border_css(border):
+        if border and border.get('width') and border.get('color'):
+            w = border['width']
+            c = border['color']
+            return f"box-shadow: inset 0 0 0 {w}in {c};"
+        return ""
+
+    front_border_css = get_paper_border_css(front_paper_border)
+    back_border_css = get_paper_border_css(back_paper_border)
+
+    img_css = generate_box_css(img_left, img_y, img_w, img_h, img_style, paper_h)
+    caption_css = generate_box_css(caption_left, caption_y, caption_w, caption_h, caption_style, paper_h)
+    note_css = generate_box_css(note_left, note_y, note_w, note_h, back_note_style, paper_h)
+
+    # Handle special double-column layout
+    special_mode = front.get('special')
+    gutter = front.get('gutter', 0.25)
+
+    if special_mode == 'double_col':
+        caption_border = caption_style.get('border', {}) if caption_style else {}
+        rule_color = caption_border.get('color', '#000000')
+        caption_block_html = f'''
+            <div class="caption-box" style="{caption_css} overflow: hidden; padding: 0.1in; column-count: 2; column-gap: {gutter}in; column-fill: auto; column-rule: 1px solid {rule_color}; text-align: {front_css['text_align']}; font-family: {{{{FONT_FAMILY}}}}; font-size: {front_css['font_size']}pt; color: {font_color or '#000000'};">{{{{CAPTION}}}}</div>'''
+    else:
+        caption_block_html = f'''
+            <div class="caption-box" style="{caption_css} display: flex; flex-direction: column; justify-content: {front_css['align_items']}; overflow: hidden; padding: 0.1in;">
+                <div style="text-align: {front_css['text_align']}; font-family: {{{{FONT_FAMILY}}}}; font-size: {front_css['font_size']}pt; color: {font_color or '#000000'};">{{{{CAPTION}}}}</div>
+            </div>'''
+
+    html = f'''<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>{layout_name}</title>
+    <style>
+        @page {{
+            size: {paper_w}in {paper_h}in;
+            margin: 0;
+        }}
+        @media print {{
+            body {{ margin: 0; }}
+            .page {{ page-break-after: always; }}
+            .page:last-child {{ page-break-after: auto; }}
+        }}
+        * {{
+            box-sizing: border-box;
+        }}
+        body {{
+            margin: 0;
+            padding: 0;
+            font-family: {{{{FONT_FAMILY}}}};
+        }}
+        .page {{
+            width: {paper_w}in;
+            height: {paper_h}in;
+            position: relative;
+            overflow: hidden;
+        }}
+        .image-box img {{
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }}
+        p {{
+            margin: 0 0 0.5em 0;
+        }}
+        p:last-child {{
+            margin-bottom: 0;
+        }}
+    </style>
+</head>
+<body>
+    <!-- Front Page -->
+    <div class="page" style="background: {front_paper_bg}; {front_border_css}">
+        <div class="image-box" style="{img_css} overflow: hidden;">
+            {{{{IMAGE}}}}
+        </div>
+        {caption_block_html}
+    </div>
+
+    <!-- Back Page -->
+    <div class="page" style="background: {back_paper_bg}; {back_border_css}">
+        <div class="note-box" style="{note_css} display: flex; flex-direction: column; justify-content: {back_css['align_items']}; overflow: hidden; padding: 0.1in;">
+            <div style="text-align: {back_css['text_align']}; font-family: {{{{FONT_FAMILY}}}}; font-size: {back_css['font_size']}pt; color: {back_font_color or '#000000'};">{{{{NOTE}}}}</div>
+        </div>
+    </div>
+</body>
+</html>'''
+
+    return html
 
 
 def resolve_color(theme, style_key):
@@ -392,8 +678,7 @@ def load_batch(batch_path):
         with open(batch_path, 'r') as f:
             data = json.load(f)
     except FileNotFoundError:
-        print(f"Error: Batch file not found: {batch_path}")
-        sys.exit(1)
+        raise FileNotFoundError(f"Batch file not found: {batch_path}")
 
     return (
         data.get('batch', []),

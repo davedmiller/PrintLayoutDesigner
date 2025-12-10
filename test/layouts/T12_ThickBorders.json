@@ -1,0 +1,42 @@
+{
+  "name": "T12_ThickBorders",
+  "title": "Border Test - Thick Borders",
+  "paper_size": {
+    "width": 8.5,
+    "height": 11
+  },
+  "front": {
+    "img_dims": {"width": 5.5, "height": 3.5},
+    "img_pos": {"left": 1.5, "top": 1.75},
+    "caption_dims": {"width": 5.5, "height": 2},
+    "caption_pos": {"left": 1.5, "top": 6.5},
+    "special": null,
+    "gutter": null,
+    "border_widths": {
+      "paper": 0.25,
+      "img": 0.25,
+      "caption": 0.25
+    },
+    "text_style": {
+      "align_h": "center",
+      "align_v": "middle",
+      "font": "Georgia, serif",
+      "size": 10
+    }
+  },
+  "back": {
+    "note_dims": {"width": 5.5, "height": 7.5},
+    "note_pos": "centered",
+    "border_widths": {
+      "paper": 0.25,
+      "note": 0.25
+    },
+    "text_style": {
+      "align_h": "center",
+      "align_v": "middle",
+      "font": "Georgia, serif",
+      "size": 10
+    }
+  },
+  "notes": "TEST: All borders 0.25\"\nBoundary: thick borders everywhere"
+}

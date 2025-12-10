@@ -1,0 +1,42 @@
+{
+  "name": "T14_MinimalMargins",
+  "title": "Position Test - Minimal Margins",
+  "paper_size": {
+    "width": 8.5,
+    "height": 11
+  },
+  "front": {
+    "img_dims": {"width": 7.5, "height": 5},
+    "img_pos": {"left": 0.5, "top": 0.5},
+    "caption_dims": {"width": 7.5, "height": 3},
+    "caption_pos": {"left": 0.5, "top": 6},
+    "special": null,
+    "gutter": null,
+    "border_widths": {
+      "paper": 0.25,
+      "img": 0.0625,
+      "caption": 0.0625
+    },
+    "text_style": {
+      "align_h": "left",
+      "align_v": "top",
+      "font": "Georgia, serif",
+      "size": 10
+    }
+  },
+  "back": {
+    "note_dims": {"width": 7.5, "height": 10},
+    "note_pos": "centered",
+    "border_widths": {
+      "paper": 0.25,
+      "note": 0.0625
+    },
+    "text_style": {
+      "align_h": "left",
+      "align_v": "top",
+      "font": "Georgia, serif",
+      "size": 10
+    }
+  },
+  "notes": "TEST: Minimal margins (0.5\")\nBoundary: content near edges"
+}

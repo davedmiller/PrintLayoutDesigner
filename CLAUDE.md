@@ -49,6 +49,21 @@ python PrintLayoutDesigner.py test/batch.json       # Run test batch
 
 See `docs/jsondocs.md` for complete JSON documentation.
 
+## API Functions
+
+For use as an importable module:
+
+```python
+from PrintLayoutDesigner import (
+    list_layouts,        # Discovery: list available layouts
+    list_themes,         # Discovery: list available themes
+    get_layout_spec,     # Returns structured dict with geometry and colors
+    get_html_template,   # Returns HTML with {{IMAGE}}, {{CAPTION}}, {{NOTE}}, {{FONT_FAMILY}} placeholders
+)
+```
+
+See `docs/GALLERY_PRINT_INTEGRATION.md` for integration details.
+
 ## Utility Scripts
 
 ```bash

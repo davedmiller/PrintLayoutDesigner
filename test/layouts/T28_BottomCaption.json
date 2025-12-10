@@ -1,0 +1,42 @@
+{
+  "name": "T28_BottomCaption",
+  "title": "Edge Case - Caption at Bottom",
+  "paper_size": {
+    "width": 8.5,
+    "height": 11
+  },
+  "front": {
+    "img_dims": {"width": 6, "height": 4},
+    "img_pos": {"left": 1.25, "top": 1.5},
+    "caption_dims": {"width": 6, "height": 2},
+    "caption_pos": {"left": 1.25, "top": 8.5},
+    "special": null,
+    "gutter": null,
+    "border_widths": {
+      "paper": 0.5,
+      "img": 0.125,
+      "caption": 0.0625
+    },
+    "text_style": {
+      "align_h": "left",
+      "align_v": "bottom",
+      "font": "Georgia, serif",
+      "size": 10
+    }
+  },
+  "back": {
+    "note_dims": {"width": 6, "height": 8},
+    "note_pos": "centered",
+    "border_widths": {
+      "paper": 0.5,
+      "note": 0.0625
+    },
+    "text_style": {
+      "align_h": "left",
+      "align_v": "top",
+      "font": "Georgia, serif",
+      "size": 10
+    }
+  },
+  "notes": "TEST: Caption at bottom of paper\n0.5\" bottom margin only"
+}

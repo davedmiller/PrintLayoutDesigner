@@ -1,0 +1,42 @@
+{
+  "name": "T29_TopImage",
+  "title": "Edge Case - Image at Top",
+  "paper_size": {
+    "width": 8.5,
+    "height": 11
+  },
+  "front": {
+    "img_dims": {"width": 6, "height": 4},
+    "img_pos": {"left": 1.25, "top": 0.75},
+    "caption_dims": {"width": 6, "height": 3},
+    "caption_pos": {"left": 1.25, "top": 5.5},
+    "special": null,
+    "gutter": null,
+    "border_widths": {
+      "paper": 0.5,
+      "img": 0.125,
+      "caption": 0.0625
+    },
+    "text_style": {
+      "align_h": "left",
+      "align_v": "top",
+      "font": "Georgia, serif",
+      "size": 10
+    }
+  },
+  "back": {
+    "note_dims": {"width": 6, "height": 8},
+    "note_pos": "centered",
+    "border_widths": {
+      "paper": 0.5,
+      "note": 0.0625
+    },
+    "text_style": {
+      "align_h": "left",
+      "align_v": "top",
+      "font": "Georgia, serif",
+      "size": 10
+    }
+  },
+  "notes": "TEST: Image at top of paper\n0.75\" top margin only"
+}

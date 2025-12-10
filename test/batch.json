@@ -65,6 +65,120 @@
       "front_theme": "fresh-mint-leaves_dark.json",
       "back_theme": "simple_light.json",
       "description": "Boundary: large note area (7.5x10\")"
+    },
+    {
+      "layout": "T11_NoBorders.json",
+      "front_theme": "Christmas_light.json",
+      "back_theme": "simple_light.json",
+      "description": "Border: all borders = 0"
+    },
+    {
+      "layout": "T12_ThickBorders.json",
+      "front_theme": "Antique Christmas_dark.json",
+      "back_theme": "simple_light.json",
+      "description": "Border: 0.25\" everywhere"
+    },
+    {
+      "layout": "T13_MixedBorders.json",
+      "front_theme": "Modern-concrete-house_dark.json",
+      "back_theme": "simple_light.json",
+      "description": "Border: mixed widths"
+    },
+    {
+      "layout": "T14_MinimalMargins.json",
+      "front_theme": "Turbulent-Blue-Water-Splash_dark.json",
+      "back_theme": "simple_light.json",
+      "description": "Position: minimal margins (0.5\")"
+    },
+    {
+      "layout": "T15_MaximalMargins.json",
+      "front_theme": "sandy-beach-with-foamy-waves-and bright sky_dark.json",
+      "back_theme": "simple_light.json",
+      "description": "Position: maximal margins"
+    },
+    {
+      "layout": "T16_AsymLeft.json",
+      "front_theme": "Blue Denim Jeans_light.json",
+      "back_theme": "simple_light.json",
+      "description": "Position: content shifted left"
+    },
+    {
+      "layout": "T17_AsymRight.json",
+      "front_theme": "fresh-mint-leaves_light.json",
+      "back_theme": "simple_light.json",
+      "description": "Position: content shifted right"
+    },
+    {
+      "layout": "T18_LargePaper.json",
+      "front_theme": "Christmas_dark.json",
+      "back_theme": "simple_light.json",
+      "description": "Paper: 11x14 size"
+    },
+    {
+      "layout": "T19_SquareImage.json",
+      "front_theme": "Antique Christmas_light.json",
+      "back_theme": "simple_light.json",
+      "description": "Image: square (5x5\")"
+    },
+    {
+      "layout": "T20_WideImage.json",
+      "front_theme": "Modern-concrete-house_light.json",
+      "back_theme": "simple_light.json",
+      "description": "Image: wide panoramic (7x2.5\")"
+    },
+    {
+      "layout": "T21_TallImage.json",
+      "front_theme": "Turbulent-Blue-Water-Splash_light.json",
+      "back_theme": "simple_light.json",
+      "description": "Image: tall portrait (4x6\")"
+    },
+    {
+      "layout": "T22_WideCaption.json",
+      "front_theme": "sandy-beach-with-foamy-waves-and bright sky_light.json",
+      "back_theme": "simple_light.json",
+      "description": "Caption: wider than image"
+    },
+    {
+      "layout": "T23_NarrowCaption.json",
+      "front_theme": "Blue Denim Jeans_dark.json",
+      "back_theme": "simple_light.json",
+      "description": "Caption: narrower than image"
+    },
+    {
+      "layout": "T24_TallCaption.json",
+      "front_theme": "fresh-mint-leaves_dark.json",
+      "back_theme": "simple_light.json",
+      "description": "Caption: very tall (5\")"
+    },
+    {
+      "layout": "T25_TinyNote.json",
+      "front_theme": "Christmas_light.json",
+      "back_theme": "simple_light.json",
+      "description": "Note: small area (4x4\")"
+    },
+    {
+      "layout": "T26_WideNote.json",
+      "front_theme": "Antique Christmas_dark.json",
+      "back_theme": "simple_light.json",
+      "description": "Note: full width (7.5\")"
+    },
+    {
+      "layout": "T27_NoGap.json",
+      "front_theme": "Modern-concrete-house_dark.json",
+      "back_theme": "simple_light.json",
+      "description": "Edge: no gap between image/caption"
+    },
+    {
+      "layout": "T28_BottomCaption.json",
+      "front_theme": "Turbulent-Blue-Water-Splash_dark.json",
+      "back_theme": "simple_light.json",
+      "description": "Edge: caption at bottom"
+    },
+    {
+      "layout": "T29_TopImage.json",
+      "front_theme": "sandy-beach-with-foamy-waves-and bright sky_dark.json",
+      "back_theme": "simple_light.json",
+      "description": "Edge: image at top"
     }
   ]
 }

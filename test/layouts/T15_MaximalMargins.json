@@ -1,0 +1,42 @@
+{
+  "name": "T15_MaximalMargins",
+  "title": "Position Test - Maximal Margins",
+  "paper_size": {
+    "width": 8.5,
+    "height": 11
+  },
+  "front": {
+    "img_dims": {"width": 3, "height": 2},
+    "img_pos": {"left": 2.75, "top": 2.5},
+    "caption_dims": {"width": 3, "height": 1},
+    "caption_pos": {"left": 2.75, "top": 5},
+    "special": null,
+    "gutter": null,
+    "border_widths": {
+      "paper": 0.5,
+      "img": 0.125,
+      "caption": 0.0625
+    },
+    "text_style": {
+      "align_h": "center",
+      "align_v": "middle",
+      "font": "Georgia, serif",
+      "size": 9
+    }
+  },
+  "back": {
+    "note_dims": {"width": 3, "height": 4},
+    "note_pos": "centered",
+    "border_widths": {
+      "paper": 0.5,
+      "note": 0.0625
+    },
+    "text_style": {
+      "align_h": "center",
+      "align_v": "middle",
+      "font": "Georgia, serif",
+      "size": 9
+    }
+  },
+  "notes": "TEST: Maximal margins\nBoundary: small centered content"
+}

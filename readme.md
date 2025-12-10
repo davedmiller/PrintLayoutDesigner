@@ -1,80 +1,137 @@
-Here is a clean, professional `README.md` file summarizing the purpose and usage of the Python script we created. You can place this file in the same folder as your script.
+# PrintLayoutDesigner
 
------
+A Python tool that generates print layouts for gallery photography with technical blueprint diagrams.
 
-# Gallery Layout Generator
+## Purpose
 
-A Python utility that generates precise, to-scale technical diagrams for photography printing and framing.
+PrintLayoutDesigner creates two-sided print layouts (front with image + caption, back with personal note) and generates technical blueprint diagrams showing precise dimensions for printing and framing.
 
-This tool was created to replace AI image generation for technical diagrams, ensuring that all dimensions, margins, and alignments are mathematically accurate rather than "hallucinated."
+## Features
 
-## 📋 Purpose
+- **Separate layouts and themes**: Geometry (layouts) and colors (themes) are defined in separate JSON files
+- **Batch processing**: Generate multiple layouts with different theme combinations
+- **HTML output**: Print-ready HTML layouts for browser viewing/printing
+- **Blueprint diagrams**: Technical PNG diagrams with dimension annotations
+- **API for integration**: Can be imported as a module by other Python projects
 
-This script generates **14 distinct layout variations** for printing photography on **8.5" x 11" (Letter)** paper. It visualizes how a 6x4" (Landscape) or 4x6" (Portrait) image pairs with a 100-word caption block.
+## Directory Structure
 
-The output images are styled as **technical diagrams** (dark blue lines on off-white canvas) and include:
-
-  * To-scale visual representations of the image and text block.
-  * Dimension arrows indicating margins.
-  * A "Notes" sidebar with specific installation and typography instructions.
-  * Paper borders and cut lines.
-
-## 🛠️ Technologies
-
-  * **Python 3**
-  * **Matplotlib:** Used here not for data plotting, but for coordinate-based technical drawing and rendering high-DPI images.
-
-## 📦 Installation
-
-1.  Ensure you have Python installed.
-2.  Install the required dependency:
-
-<!-- end list -->
-
-```bash
-pip install matplotlib
+```
+PrintLayoutDesigner/
+├── PrintLayoutDesigner.py    # Main script
+├── batch.json                # Batch configuration (what to generate)
+├── layouts/                  # Layout JSON files (geometry)
+├── themes/                   # Theme JSON files (colors)
+├── production/               # Production layouts and themes
+│   ├── layouts/
+│   └── themes/
+├── test/                     # Test layouts and assets
+│   ├── layouts/
+│   ├── assets/
+│   └── batch.json
+├── output/                   # Generated output
+└── docs/                     # Documentation
 ```
 
-## 🚀 Usage
-
-1.  Save the script as `generate_layouts.py`.
-2.  Run the script from your terminal:
-
-<!-- end list -->
+## Installation
 
 ```bash
-python generate_layouts.py
+pip install matplotlib markdown
 ```
 
-3.  The script will generate **14 PNG files** in the same directory.
+## Usage
 
-## 📂 Included Layout Styles
+### Command Line
 
-The script generates Landscape (6x4 image) and Portrait (4x6 image) versions of the following design styles:
+```bash
+# Generate from default batch.json
+python PrintLayoutDesigner.py
 
-| Style | Description |
-| :--- | :--- |
-| **Classic Museum** | The standard gallery look. Image centered with a text block centered directly below. |
-| **Art Book** | Asymmetrical layout. Image pushed to Top-Right; Text pushed to Bottom-Left for diagonal flow. |
-| **Footer** | Image centered optically; Text stretches wide across the bottom of the page. |
-| **Broadside** | (Portrait only) Magazine-style layout with image on left and text column on right. |
-| **Double Column** | (Landscape only) Academic style. Text split into two narrow columns below the image. |
-| **Visual Anchor** | Similar to Museum, but with a heavier top margin (2.5") for a "hanging" feel. |
-| **High Gallery** | Image placed high, text placed low, creating a large deliberate void/pause in the middle. |
-| **Asymmetrical Offset** | Image pushed to the right margin; Text aligns flush-left with the image edge. |
+# Generate from specific batch file
+python PrintLayoutDesigner.py path/to/batch.json
+```
 
-## ⚙️ Customization
+### As a Module (API)
 
-You can modify the `layouts` list at the bottom of the script to adjust:
+```python
+from PrintLayoutDesigner import (
+    list_layouts,
+    list_themes,
+    get_layout_spec,
+    get_html_template,
+)
 
-  * **Margins:** Change `top`, `left`, or `right` values in inches.
-  * **Paper Size:** Modify `FIG_W` and `FIG_H` constants at the top of the script.
-  * **Colors:** Change `BLUE` and `CANVAS_COLOR` constants to alter the aesthetic.
+# Discover available layouts and themes
+layouts = list_layouts('/path/to/production')
+themes = list_themes('/path/to/production')
 
-## 📄 Output Example
+# Get structured layout specification
+spec = get_layout_spec(
+    layout_name='01_ClassicMuseum_Land_8-5x11',
+    front_theme_name='Christmas_light',
+    back_theme_name='simple_light',
+    base_dir='/path/to/production'
+)
 
-Each file is saved at **150 DPI**, suitable for screen viewing or reference printing.
+# Get HTML template with placeholders
+template = get_html_template(
+    layout_name='01_ClassicMuseum_Land_8-5x11',
+    front_theme_name='Christmas_light',
+    back_theme_name='simple_light',
+    base_dir='/path/to/production'
+)
+# Returns HTML with {{IMAGE}}, {{CAPTION}}, {{NOTE}}, {{FONT_FAMILY}} placeholders
+```
 
-  * `01_ClassicMuseum_Land.png`
-  * `02_ClassicMuseum_Port.png`
-  * ...and so on.
+## Configuration
+
+### batch.json
+
+Controls what gets generated:
+
+```json
+{
+  "mode": "design",
+  "show_blueprints": true,
+  "image_path_landscape": "/path/to/landscape.jpg",
+  "image_path_portrait": "/path/to/portrait.jpg",
+  "text_path": "/path/to/caption.md",
+  "personal_note_path": "/path/to/note.md",
+  "batch": [
+    {
+      "layout": "01_ClassicMuseum_Land_8-5x11.json",
+      "front_theme": "Christmas_light.json",
+      "back_theme": "simple_light.json"
+    }
+  ]
+}
+```
+
+### Layouts (layouts/*.json)
+
+Define geometry: paper size, image/caption positions and dimensions, border widths, text alignment.
+
+### Themes (themes/*.json)
+
+Define colors: paper background, borders, caption background, font colors.
+
+See `docs/jsondocs.md` for complete JSON schema documentation.
+
+## Utility Scripts
+
+```bash
+python scripts/generate_batch.py    # Generate batch.json with random theme combinations
+python scripts/import_theme.py      # Import Adobe Color CSS as themes
+python scripts/migrate_layouts.py   # Migrate from old layouts format
+```
+
+## Output
+
+- **HTML files**: Print-ready layouts viewable in browser
+- **Blueprint PNGs**: Technical diagrams with dimension annotations
+- **all.html**: Combined view of all generated layouts
+
+## Documentation
+
+- `docs/jsondocs.md` - JSON schema for layouts and themes
+- `docs/GALLERY_PRINT_INTEGRATION.md` - Integration guide for PostCardMaker

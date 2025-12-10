@@ -1,0 +1,42 @@
+{
+  "name": "T18_LargePaper",
+  "title": "Paper Size - 11x14",
+  "paper_size": {
+    "width": 11,
+    "height": 14
+  },
+  "front": {
+    "img_dims": {"width": 8, "height": 6},
+    "img_pos": {"left": 1.5, "top": 1.5},
+    "caption_dims": {"width": 8, "height": 3},
+    "caption_pos": {"left": 1.5, "top": 8.5},
+    "special": null,
+    "gutter": null,
+    "border_widths": {
+      "paper": 0.5,
+      "img": 0.125,
+      "caption": 0.0625
+    },
+    "text_style": {
+      "align_h": "left",
+      "align_v": "top",
+      "font": "Georgia, serif",
+      "size": 12
+    }
+  },
+  "back": {
+    "note_dims": {"width": 8, "height": 11},
+    "note_pos": "centered",
+    "border_widths": {
+      "paper": 0.5,
+      "note": 0.0625
+    },
+    "text_style": {
+      "align_h": "left",
+      "align_v": "top",
+      "font": "Georgia, serif",
+      "size": 12
+    }
+  },
+  "notes": "TEST: 11x14\" paper size\nLarger format test"
+}
