@@ -1,4 +1,13 @@
-# PrintLayoutDesigner
+# PrintLayoutDesigner (ARCHIVED)
+
+> **⚠️ This project has been migrated to [PostCardMaker](https://github.com/davedmiller/PostCardMaker).**
+>
+> All functionality is now available in PostCardMaker v2.04.00+:
+> - CLI tool: `scripts/gallery_print_cli.py`
+> - Utility scripts: `scripts/gallery_print/`
+> - Service API: `postcard_app/services/gallery_layout_service.py`
+
+---
 
 A Python tool that generates print layouts for gallery photography with technical blueprint diagrams.
 
